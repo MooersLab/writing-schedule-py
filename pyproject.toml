@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "writing-schedule"
+version = "0.1.0"
+description = "Turn a weekly org-mode block table into a dated schedule, an iCalendar file, and a printable time-block PDF."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Blaine Mooers", email = "blaine-mooers@ou.edu" }]
+keywords = ["org-mode", "calendar", "icalendar", "reportlab", "time-blocking", "schedule"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Office/Business :: Scheduling",
+]
+dependencies = ["reportlab>=3.6"]
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[project.scripts]
+writing-schedule = "writing_schedule.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/blaine-mooers/writing-schedule-py"
+
+[tool.setuptools]
+packages = ["writing_schedule"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
