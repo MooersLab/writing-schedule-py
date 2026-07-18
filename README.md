@@ -237,7 +237,7 @@ provenance live in `tests/fixtures/expected/`.
 - MooersLab/writingLogTemplateIn
 - MooersLab/whisper-dvr
 - MooersLab/programmingLogInOrg
-- 
+
 ## Sources of funding
 
 - NIH: R01 CA242845.
