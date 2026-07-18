@@ -15,7 +15,7 @@ variant from drifting into a dialect of its own.
 ## Installation
 
 ```
-pip install writing-schedule        # once published to PyPI
+pip install writing-schedule        # now published to PyPI
 pipx install writing-schedule        # isolated console tool
 pip install -e .                     # from a checkout, for development
 ```
