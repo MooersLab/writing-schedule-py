@@ -229,6 +229,63 @@ against the elisp `ox-icalendar` export, comparing the set of events by local
 start, local end, summary, and categories. The frozen files and their
 provenance live in `tests/fixtures/expected/`.
 
+## Using the Makefile
+
+The repository ships a `Makefile` that wraps the common tasks, so you do not
+have to remember each command. It is self-documenting, because running `make`
+with no target, or `make help`, prints the list.
+
+```
+make help
+```
+
+The targets fall into three groups, namely working with the package, building
+and publishing a release, and refreshing the parity fixtures.
+
+| Target | What it does |
+|--------|--------------|
+| `make install` | Install the package. |
+| `make dev` | Install the package in editable mode with the test extras. |
+| `make test` | Run the pytest suite. |
+| `make coverage` | Run the tests with a line-coverage report. |
+| `make lint` | Lint with ruff when it is installed, and skip with a note when it is not. |
+| `make demo` | Generate the schedule, calendar, and sheets from an example table into `out/`. |
+| `make build` | Build the sdist and wheel into `dist/`. |
+| `make check` | Build, then validate the distributions with twine. |
+| `make publish-test` | Upload the built distributions to TestPyPI. |
+| `make publish` | Upload the built distributions to PyPI. |
+| `make reference` | Refresh the frozen elisp fixtures from Emacs. |
+| `make clean` | Remove caches, build artifacts, and the demo output. |
+
+A first session usually runs three targets in order, one to install, one to
+test, and one to see real output.
+
+```
+make dev
+make test
+make demo
+```
+
+Several targets read their inputs from variables that you can override on the
+command line, so the demo can point at any table, week, and output directory:
+
+```
+make demo TABLE=examples/my-week.org WEEK=2026-03-02 OUT=build/demo
+```
+
+The `reference` target needs Emacs and the path to the elisp package, because
+it runs the reference implementation to rewrite the files in
+`tests/fixtures/expected/`:
+
+```
+make reference WS_EL=../writing-schedule.el
+```
+
+The build, check, and coverage targets install `build`, `twine`, and
+`pytest-cov` on demand, and only when those tools are missing, so a fresh
+checkout still works. If you edit the `Makefile`, keep each recipe line
+indented with a tab rather than spaces, because Make requires it.
+
 ## Related websites
 
 - MooersLab/writing-schedule
@@ -244,5 +301,3 @@ provenance live in `tests/fixtures/expected/`.
 - NIH: R01 AI088011.
 - NIH: P30 CA225520 (PI: R. Mannel).
 - NIH: P20 GM103640 and P30 GM145423 (PI: A. West).
-
-
