@@ -2,6 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/writing-schedule.svg)](https://pypi.org/project/writing-schedule/)
 [![Python versions](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://pypi.org/project/writing-schedule/)
+[![Documentation Status](https://readthedocs.org/projects/writing-schedule/badge/?version=latest)](https://writing-schedule.readthedocs.io/en/latest/?badge=latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A Python port of `mooerslab/writing-schedule.el`. It reads the same weekly org-mode
