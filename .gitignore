@@ -36,4 +36,4 @@ ENV/
 .ruff_cache/
 
 # Deposition notes
-protocol-for-uploading-the-writing-schedule-package-to-melpa.org
+readthedocs-protocol.org
