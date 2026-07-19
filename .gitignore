@@ -34,3 +34,6 @@ ENV/
 # Type-checker caches
 .mypy_cache/
 .ruff_cache/
+
+# Deposition notes
+protocol-for-uploading-the-writing-schedule-package-to-melpa.org
