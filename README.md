@@ -1,5 +1,5 @@
 # writing-schedule (Python)
-![Version](https://img.shields.io/static/v1?label=writing-schdule-py&message=0.0.0&color=brightcolor)
+![Version](https://img.shields.io/static/v1?label=writing-schdule-py&message=0.1.0&color=brightcolor)
 [![PyPI version](https://img.shields.io/pypi/v/writing-schedule.svg)](https://pypi.org/project/writing-schedule/)
 [![Python versions](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://pypi.org/project/writing-schedule/)
 [![Documentation Status](https://readthedocs.org/projects/writing-schedule-py/badge/?version=latest)](https://writing-schedule-py.readthedocs.io/en/latest/?badge=latest)
