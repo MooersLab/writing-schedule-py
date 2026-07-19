@@ -1,0 +1,182 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>writing_schedule.sheet_org &mdash; writing-schedule 0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            writing-schedule
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial: build a schedule from an org table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../org-format.html">The org table format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library.html">Using the library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../daylight-saving.html">Daylight saving and time zones</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">writing-schedule</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">writing_schedule.sheet_org</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for writing_schedule.sheet_org</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Write the editable week org file, one booktabs table per day.</span>
+
+<span class="sd">Ports ``writing-schedule--timeblock-org-document``.  See the format spec,</span>
+<span class="sd">&quot;The editable week export&quot;.  Days appear in day-column order and blocks within</span>
+<span class="sd">a day are sorted by start time; the Revision column is always empty.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_dt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParsedTable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.week</span><span class="w"> </span><span class="kn">import</span> <span class="n">DAY_FULL</span><span class="p">,</span> <span class="n">day_of_week</span><span class="p">,</span> <span class="n">iso_date</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_tidy</span><span class="p">(</span><span class="n">hhmm</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Drop a leading zero on the hour, so ``04:00`` becomes ``4:00``.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">hhmm</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="n">hhmm</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">hhmm</span>
+
+
+<div class="viewcode-block" id="build_week_org">
+<a class="viewcode-back" href="../../api.html#writing_schedule.sheet_org.build_week_org">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_week_org</span><span class="p">(</span>
+    <span class="n">parsed</span><span class="p">:</span> <span class="n">ParsedTable</span><span class="p">,</span> <span class="n">monday</span><span class="p">:</span> <span class="n">_dt</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Config</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the editable week org document as a string.&quot;&quot;&quot;</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">config</span> <span class="ow">or</span> <span class="n">Config</span><span class="p">()</span>
+    <span class="n">legend</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">effective_legend</span><span class="p">(</span><span class="n">parsed</span><span class="o">.</span><span class="n">legend</span><span class="p">))</span>
+    <span class="n">offsets</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">({</span><span class="n">off</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">off</span> <span class="ow">in</span> <span class="n">parsed</span><span class="o">.</span><span class="n">columns</span><span class="p">})</span>
+
+    <span class="n">out</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;#+TITLE: Time-Block Sheets, week of </span><span class="si">{</span><span class="n">iso_date</span><span class="p">(</span><span class="n">monday</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;#+LaTeX_HEADER: </span><span class="se">\\</span><span class="s2">usepackage[margin=0.5in]</span><span class="si">{geometry}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;#+OPTIONS: toc:nil</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;* Key</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">key_lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ltr</span> <span class="ow">in</span> <span class="n">parsed</span><span class="o">.</span><span class="n">letters</span><span class="p">:</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="n">legend</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ltr</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">key_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- =</span><span class="si">{</span><span class="n">ltr</span><span class="si">}</span><span class="s2">=&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot; :: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">desc</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key_lines</span><span class="p">))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">day_blocks</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">off</span> <span class="ow">in</span> <span class="n">offsets</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">day_of_week</span><span class="p">(</span><span class="n">monday</span><span class="p">,</span> <span class="n">off</span><span class="p">)</span>
+        <span class="n">date_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">iso_date</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">DAY_FULL</span><span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">weekday</span><span class="p">()]</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="n">day_events</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">parsed</span><span class="o">.</span><span class="n">events</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">offset</span> <span class="o">==</span> <span class="n">off</span><span class="p">),</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;* &quot;</span> <span class="o">+</span> <span class="n">date_str</span><span class="p">]</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;#+CAPTION: Planned time blocks for </span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;#+ATTR_LATEX: :booktabs t&quot;</span><span class="p">)</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;| Time | Code | Task | Revision |&quot;</span><span class="p">)</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;|-&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">day_events</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">day_events</span><span class="p">:</span>
+                <span class="n">task</span> <span class="o">=</span> <span class="n">legend</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">letter</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;| </span><span class="si">{</span><span class="n">_tidy</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">start</span><span class="p">)</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">_tidy</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">end</span><span class="p">)</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">letter</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2"> | |&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;| | | | |&quot;</span><span class="p">)</span>
+        <span class="n">day_blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">day_blocks</span><span class="p">))</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Blaine Mooers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

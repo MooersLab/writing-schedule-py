@@ -1,0 +1,165 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daylight saving and time zones &mdash; writing-schedule 0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API reference" href="api.html" />
+    <link rel="prev" title="Using the library" href="library.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            writing-schedule
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial: build a schedule from an org table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="org-format.html">The org table format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library.html">Using the library</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Daylight saving and time zones</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-the-calendar-carries-the-time">How the calendar carries the time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-verified-example">A verified example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#choosing-the-zone">Choosing the zone</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#floating-times">Floating times</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">writing-schedule</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Daylight saving and time zones</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/daylight-saving.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="daylight-saving-and-time-zones">
+<h1>Daylight saving and time zones<a class="headerlink" href="#daylight-saving-and-time-zones" title="Link to this heading"></a></h1>
+<p>Daylight saving is the most likely source of a quiet calendar error, because a
+block that looks correct in March can land an hour off in November. This
+package avoids that error by writing local wall-clock times with an explicit
+time zone.</p>
+<section id="how-the-calendar-carries-the-time">
+<h2>How the calendar carries the time<a class="headerlink" href="#how-the-calendar-carries-the-time" title="Link to this heading"></a></h2>
+<p>Each event is written as a local wall-clock value with a <code class="docutils literal notranslate"><span class="pre">TZID</span></code> parameter, and
+the file carries a <code class="docutils literal notranslate"><span class="pre">VTIMEZONE</span></code> component derived from the standard-library
+<code class="docutils literal notranslate"><span class="pre">zoneinfo</span></code> database. A 04:00 block is therefore written literally as <code class="docutils literal notranslate"><span class="pre">040000</span></code>
+with a <code class="docutils literal notranslate"><span class="pre">TZID</span></code>, so it stays at 04:00 in every week, and the <code class="docutils literal notranslate"><span class="pre">VTIMEZONE</span></code> supplies
+the offset a calendar client needs to compute the correct absolute instant.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">VTIMEZONE</span></code> is not a fixed offset. It carries the daylight and standard
+observances for the zone, each with an <code class="docutils literal notranslate"><span class="pre">RRULE</span></code> derived from the transition, for
+example the second Sunday of March and the first Sunday of November for the
+United States zones. Because the offset comes from the named zone rather than
+from a constant, a block keeps its wall-clock time across a transition and the
+absolute instant is still correct.</p>
+</section>
+<section id="a-verified-example">
+<h2>A verified example<a class="headerlink" href="#a-verified-example" title="Link to this heading"></a></h2>
+<p>The test suite pins this behavior. A 04:00 block resolves to 10:00 UTC in a
+winter week, when the offset is CST, and to 09:00 UTC in a summer week, when the
+offset is CDT. In both weeks the local time a calendar shows is 04:00, which is
+the property that matters to a person reading the schedule.</p>
+</section>
+<section id="choosing-the-zone">
+<h2>Choosing the zone<a class="headerlink" href="#choosing-the-zone" title="Link to this heading"></a></h2>
+<p>The default zone is <code class="docutils literal notranslate"><span class="pre">America/Chicago</span></code>. Set another zone on the command line
+with <code class="docutils literal notranslate"><span class="pre">--tz</span></code>, or in the library through the <code class="docutils literal notranslate"><span class="pre">timezone</span></code> field of
+<a class="reference internal" href="api.html#writing_schedule.config.Config" title="writing_schedule.config.Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></a>. Any IANA zone name that <code class="docutils literal notranslate"><span class="pre">zoneinfo</span></code>
+knows is accepted.</p>
+</section>
+<section id="floating-times">
+<h2>Floating times<a class="headerlink" href="#floating-times" title="Link to this heading"></a></h2>
+<p>Passing an empty string as the zone selects floating local times, which is the
+behavior of the reference Emacs implementation. A floating time has no <code class="docutils literal notranslate"><span class="pre">TZID</span></code>
+and no <code class="docutils literal notranslate"><span class="pre">VTIMEZONE</span></code>, and a calendar client interprets it in the reader’s own
+zone. This is convenient for a schedule that should read the same everywhere,
+but it is ambiguous by definition, so the named-zone default is recommended.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="library.html" class="btn btn-neutral float-left" title="Using the library" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Blaine Mooers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

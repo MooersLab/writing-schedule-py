@@ -1,0 +1,213 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>writing-schedule &mdash; writing-schedule 0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            writing-schedule
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial: build a schedule from an org table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="org-format.html">The org table format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library.html">Using the library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="daylight-saving.html">Daylight saving and time zones</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">writing-schedule</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">writing-schedule</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="writing-schedule">
+<h1>writing-schedule<a class="headerlink" href="#writing-schedule" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">writing-schedule</span></code> turns a weekly org-mode block table into three artifacts,
+namely a dated schedule <code class="docutils literal notranslate"><span class="pre">.org</span></code> file, an iCalendar <code class="docutils literal notranslate"><span class="pre">.ics</span></code> file, and a printable
+time-block PDF. It is a Python port of the Emacs package
+<code class="docutils literal notranslate"><span class="pre">mooerslab/writing-schedule.el</span></code>, and it produces the same schedule and the same
+calendar from the same table.</p>
+<p>You do not need Emacs, and you do not need <code class="docutils literal notranslate"><span class="pre">writing-schedule.el</span></code>, to use this
+package. It is a standalone command-line program and Python library whose only
+runtime dependency is ReportLab, because the PDF is drawn with ReportLab
+rather than with a TeX distribution.</p>
+<p>The weekly table is the single planning surface. You write it in any text
+editor, you keep it under version control if you wish, and the tool stamps it
+with real dates and hands the result to your calendar, your org agenda, and
+your printer.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#from-pypi">From PyPI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#from-a-checkout">From a checkout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#verifying-the-installation">Verifying the installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial: build a schedule from an org table</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#step-1-scaffold-or-copy-a-table">Step 1, scaffold or copy a table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#step-2-generate-the-outputs">Step 2, generate the outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#step-3-live-with-the-week">Step 3, live with the week</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#what-each-output-is-for">What each output is for</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="org-format.html">The org table format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="org-format.html#the-header-row">The header row</a></li>
+<li class="toctree-l2"><a class="reference internal" href="org-format.html#the-section-header-row">The section header row</a></li>
+<li class="toctree-l2"><a class="reference internal" href="org-format.html#the-time-block-row">The time-block row</a></li>
+<li class="toctree-l2"><a class="reference internal" href="org-format.html#the-legend-row">The legend row</a></li>
+<li class="toctree-l2"><a class="reference internal" href="org-format.html#a-worked-example">A worked example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="org-format.html#codes-and-descriptions">Codes and descriptions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#generate">generate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#export">export</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#sheets">sheets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#template">template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#weeks">weeks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="library.html">Using the library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="library.html#parse-a-table">Parse a table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="library.html#write-the-schedule-and-the-calendar">Write the schedule and the calendar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="library.html#draw-the-sheet-and-the-editable-week">Draw the sheet and the editable week</a></li>
+<li class="toctree-l2"><a class="reference internal" href="library.html#configure-behavior">Configure behavior</a></li>
+<li class="toctree-l2"><a class="reference internal" href="library.html#scaffold-a-blank-table">Scaffold a blank table</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="daylight-saving.html">Daylight saving and time zones</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="daylight-saving.html#how-the-calendar-carries-the-time">How the calendar carries the time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="daylight-saving.html#a-verified-example">A verified example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="daylight-saving.html#choosing-the-zone">Choosing the zone</a></li>
+<li class="toctree-l2"><a class="reference internal" href="daylight-saving.html#floating-times">Floating times</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-writing_schedule.orgtable">Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-writing_schedule.week">Dates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-writing_schedule.schedule">Schedule and calendar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-writing_schedule.sheet">Sheets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-writing_schedule.config">Configuration and utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-writing_schedule.cli">Command line</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development.html#testing-and-parity">Testing and parity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#the-makefile">The Makefile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#building-these-docs">Building these docs</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<section id="a-one-minute-example">
+<h2>A one-minute example<a class="headerlink" href="#a-one-minute-example" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">writing</span><span class="o">-</span><span class="n">schedule</span>
+<span class="n">writing</span><span class="o">-</span><span class="n">schedule</span> <span class="n">template</span> <span class="mi">5</span> <span class="o">--</span><span class="n">out</span> <span class="n">my</span><span class="o">-</span><span class="n">week</span><span class="o">.</span><span class="n">org</span>   <span class="c1"># scaffold a blank table</span>
+<span class="c1"># edit my-week.org to place your project codes in the day cells</span>
+<span class="n">writing</span><span class="o">-</span><span class="n">schedule</span> <span class="n">generate</span> <span class="n">my</span><span class="o">-</span><span class="n">week</span><span class="o">.</span><span class="n">org</span> <span class="o">--</span><span class="n">week</span> <span class="mi">2026</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">19</span> <span class="o">--</span><span class="nb">dir</span> <span class="n">out</span>
+<span class="n">writing</span><span class="o">-</span><span class="n">schedule</span> <span class="n">sheets</span>   <span class="n">my</span><span class="o">-</span><span class="n">week</span><span class="o">.</span><span class="n">org</span> <span class="o">--</span><span class="n">week</span> <span class="mi">2026</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">19</span> <span class="o">--</span><span class="nb">dir</span> <span class="n">out</span> <span class="o">--</span><span class="nb">format</span> <span class="n">both</span>
+</pre></div>
+</div>
+<p>The first command scaffolds a blank table, the <code class="docutils literal notranslate"><span class="pre">generate</span></code> command writes the
+dated schedule and the calendar, and the <code class="docutils literal notranslate"><span class="pre">sheets</span></code> command draws the printable
+PDF and an editable per-day org file.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Blaine Mooers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,261 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The org table format &mdash; writing-schedule 0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Command-line reference" href="cli.html" />
+    <link rel="prev" title="Tutorial: build a schedule from an org table" href="tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            writing-schedule
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial: build a schedule from an org table</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The org table format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-header-row">The header row</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-section-header-row">The section header row</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-time-block-row">The time-block row</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-legend-row">The legend row</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-worked-example">A worked example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#codes-and-descriptions">Codes and descriptions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library.html">Using the library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="daylight-saving.html">Daylight saving and time zones</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">writing-schedule</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">The org table format</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/org-format.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="the-org-table-format">
+<h1>The org table format<a class="headerlink" href="#the-org-table-format" title="Link to this heading"></a></h1>
+<p>The input is a single org-mode table. The first column is a label column, and
+every other column may be a day column. The parser reads the table by testing
+the first cell of each row, and horizontal rules are ignored everywhere. Four
+kinds of row carry meaning, namely the header row, the legend row, the
+time-block row, and the section header row. They are tested in that order, and
+the first test that matches wins.</p>
+<section id="the-header-row">
+<h2>The header row<a class="headerlink" href="#the-header-row" title="Link to this heading"></a></h2>
+<p>The header row is the first row in which a cell after the first names a
+weekday. Its first column is a plain label, such as <code class="docutils literal notranslate"><span class="pre">Time</span></code>, and every column
+after it that names a day becomes a day column. The accepted day spellings are
+listed below. Matching ignores case and surrounding whitespace.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Offset from Monday</p></th>
+<th class="head"><p>Accepted spellings</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>m, mo, mon</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>tu, tue</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>w, we, wed</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>th, thu</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>f, fr, fri</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p>sa, sat</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p>su, sun</p></td>
+</tr>
+</tbody>
+</table>
+<p>Day columns need not be contiguous, need not be in order, and need not cover
+all seven days, so a week of only Monday and Thursday is valid. A lone <code class="docutils literal notranslate"><span class="pre">T</span></code> is
+not accepted, because it is ambiguous between Tuesday and Thursday. Longer
+spellings such as <code class="docutils literal notranslate"><span class="pre">monday</span></code> are not accepted either.</p>
+</section>
+<section id="the-section-header-row">
+<h2>The section header row<a class="headerlink" href="#the-section-header-row" title="Link to this heading"></a></h2>
+<p>A section header row is a line whose first cell is a word or a few words with
+an optional trailing colon, such as <code class="docutils literal notranslate"><span class="pre">Generative:</span></code>. It groups the blocks
+beneath it, and its name becomes the <code class="docutils literal notranslate"><span class="pre">CATEGORY</span></code> property in the schedule file.
+The pattern accepts letters and spaces only, so a name that contains a digit,
+such as <code class="docutils literal notranslate"><span class="pre">Deep</span> <span class="pre">Work</span> <span class="pre">1</span></code>, is not recognized as a section. Before any section
+header appears, the section is <code class="docutils literal notranslate"><span class="pre">Writing</span></code>.</p>
+</section>
+<section id="the-time-block-row">
+<h2>The time-block row<a class="headerlink" href="#the-time-block-row" title="Link to this heading"></a></h2>
+<p>A time-block row is a row whose first cell holds a time range, such as
+<code class="docutils literal notranslate"><span class="pre">04:00-05:30</span></code>, once the day columns have been found. Each non-empty day cell
+under the time produces one event, and the cell text is upper-cased to become
+the event code.</p>
+<p>The time reader is forgiving. The following variations all parse to the same
+zero-padded <code class="docutils literal notranslate"><span class="pre">HH:MM</span></code> range.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Written</p></th>
+<th class="head"><p>Read as</p></th>
+<th class="head"><p>Reason</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">4:00-5:30</span></code></p></td>
+<td><p>04:00-05:30</p></td>
+<td><p>The hour may be one digit.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">16:</span> <span class="pre">30-17:</span> <span class="pre">00</span></code></p></td>
+<td><p>16:30-17:00</p></td>
+<td><p>A space may follow the colon.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">09:00</span> <span class="pre">--</span> <span class="pre">10:00</span></code></p></td>
+<td><p>09:00-10:00</p></td>
+<td><p>One or more hyphens, with spaces, are allowed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Block</span> <span class="pre">9:00-10:00</span></code></p></td>
+<td><p>09:00-10:00</p></td>
+<td><p>The range may be embedded in other text.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Minutes must be exactly two digits. The parser does not range-check the hour or
+the minute, so validate your table if that matters to you.</p>
+</section>
+<section id="the-legend-row">
+<h2>The legend row<a class="headerlink" href="#the-legend-row" title="Link to this heading"></a></h2>
+<p>A legend row maps a code to a description, as in <code class="docutils literal notranslate"><span class="pre">A:</span> <span class="pre">DNPH1</span> <span class="pre">docking</span></code>. The code
+is one uppercase letter followed by up to three more uppercase letters or
+digits, so <code class="docutils literal notranslate"><span class="pre">A</span></code>, <code class="docutils literal notranslate"><span class="pre">EM</span></code>, and <code class="docutils literal notranslate"><span class="pre">W2</span></code> are all valid, and you are not limited to four
+projects or to single letters. The description is whatever follows the colon.
+When the first cell is only the code and a colon, the description may instead
+sit in the second cell, which allows a two-column legend layout.</p>
+<p>The test for a legend code is case-sensitive, and this is the single most
+important rule in the grammar. It is what separates a code from a section
+header, because <code class="docutils literal notranslate"><span class="pre">A:</span> <span class="pre">docking</span></code> is a legend row while <code class="docutils literal notranslate"><span class="pre">Generative:</span></code> is a section
+header. A reader that lower-cased the label before testing would misread every
+section header as a legend row.</p>
+</section>
+<section id="a-worked-example">
+<h2>A worked example<a class="headerlink" href="#a-worked-example" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">|</span> <span class="n">Time</span> <span class="o">&lt;</span><span class="n">l</span><span class="o">&gt;</span>          <span class="o">|</span> <span class="n">M</span>  <span class="o">|</span> <span class="n">Tu</span> <span class="o">|</span> <span class="n">W</span>  <span class="o">|</span>
+<span class="o">|-------------------+----+----+----|</span>
+<span class="o">|</span> <span class="n">Generative</span><span class="p">:</span>       <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>
+<span class="o">|</span> <span class="mi">04</span><span class="p">:</span><span class="mi">00</span><span class="o">-</span><span class="mi">05</span><span class="p">:</span><span class="mi">30</span>       <span class="o">|</span> <span class="n">A</span>  <span class="o">|</span> <span class="n">B</span>  <span class="o">|</span> <span class="n">A</span>  <span class="o">|</span>
+<span class="o">|</span> <span class="n">Supporting</span><span class="p">:</span>       <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>
+<span class="o">|</span> <span class="mi">16</span><span class="p">:</span> <span class="mi">30</span><span class="o">-</span><span class="mi">17</span><span class="p">:</span><span class="mi">00</span>      <span class="o">|</span> <span class="n">EM</span> <span class="o">|</span> <span class="n">EM</span> <span class="o">|</span> <span class="n">EM</span> <span class="o">|</span>
+<span class="o">|-------------------+----+----+----|</span>
+<span class="o">|</span> <span class="n">A</span><span class="p">:</span> <span class="n">DNPH1</span> <span class="n">docking</span>  <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>
+<span class="o">|</span> <span class="n">EM</span><span class="p">:</span> <span class="n">email</span>         <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>
+</pre></div>
+</div>
+<p>This table yields six events. Three carry the section <code class="docutils literal notranslate"><span class="pre">Generative</span></code> and three
+carry <code class="docutils literal notranslate"><span class="pre">Supporting</span></code>. The codes are <code class="docutils literal notranslate"><span class="pre">A</span></code>, <code class="docutils literal notranslate"><span class="pre">B</span></code>, and <code class="docutils literal notranslate"><span class="pre">EM</span></code>, and the legend describes
+<code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">EM</span></code> but not <code class="docutils literal notranslate"><span class="pre">B</span></code>. A code without a legend entry still produces events,
+and its headline falls back to the code itself.</p>
+</section>
+<section id="codes-and-descriptions">
+<h2>Codes and descriptions<a class="headerlink" href="#codes-and-descriptions" title="Link to this heading"></a></h2>
+<p>A code is any short uppercase string in a day cell, so use single letters such
+as <code class="docutils literal notranslate"><span class="pre">A</span></code>, <code class="docutils literal notranslate"><span class="pre">B</span></code>, and <code class="docutils literal notranslate"><span class="pre">C</span></code> for projects and two-letter codes such as <code class="docutils literal notranslate"><span class="pre">EM</span></code> for email
+or <code class="docutils literal notranslate"><span class="pre">EX</span></code> for exercise for recurring tasks. A description for the sheet key and
+the schedule headline comes first from the table legend, which is specific to
+the week. A standing dictionary of code descriptions, passed through the
+library configuration, fills in any code the legend does not describe.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial.html" class="btn btn-neutral float-left" title="Tutorial: build a schedule from an org table" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cli.html" class="btn btn-neutral float-right" title="Command-line reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Blaine Mooers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

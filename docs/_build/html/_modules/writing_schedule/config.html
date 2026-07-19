@@ -1,0 +1,188 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>writing_schedule.config &mdash; writing-schedule 0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            writing-schedule
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial: build a schedule from an org table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../org-format.html">The org table format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library.html">Using the library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../daylight-saving.html">Daylight saving and time zones</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">writing-schedule</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">writing_schedule.config</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for writing_schedule.config</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Configuration defaults for the writing-schedule Python port.</span>
+
+<span class="sd">Each field mirrors a ``defcustom`` in ``writing-schedule.el``.  Grouping them</span>
+<span class="sd">in one dataclass keeps the generators pure: they take a :class:`Config` rather</span>
+<span class="sd">than reading globals, which makes them easy to test.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+
+
+<span class="c1"># Sections and time blocks used by the blank-template scaffold.  Each element</span>
+<span class="c1"># is (section-name, [time-range, ...]).  Mirrors ``writing-schedule-default-slots``.</span>
+<span class="n">DEFAULT_SLOTS</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;Generative&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;04:00-05:30&quot;</span><span class="p">,</span> <span class="s2">&quot;05:45-07:15&quot;</span><span class="p">,</span> <span class="s2">&quot;07:30-09:00&quot;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s2">&quot;Rewriting&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;09:15-10:45&quot;</span><span class="p">,</span> <span class="s2">&quot;11:30-13:00&quot;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s2">&quot;Supporting&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;13:15-14:45&quot;</span><span class="p">,</span> <span class="s2">&quot;15:00-16:30&quot;</span><span class="p">,</span> <span class="s2">&quot;16:45-18:15&quot;</span><span class="p">,</span> <span class="s2">&quot;20:30-22:00&quot;</span><span class="p">]),</span>
+<span class="p">]</span>
+
+<span class="c1"># Default single-letter project codes for a scaffolded template.</span>
+<span class="n">PROJECT_LETTERS</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">chr</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">),</span> <span class="nb">ord</span><span class="p">(</span><span class="s2">&quot;Z&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+
+<div class="viewcode-block" id="Config">
+<a class="viewcode-back" href="../../api.html#writing_schedule.config.Config">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Runtime configuration for schedule, calendar, and sheet generation.&quot;&quot;&quot;</span>
+
+    <span class="c1"># --- Generated schedule file -----------------------------------------</span>
+    <span class="c1">#: When True, each generated event headline carries the TODO keyword.</span>
+    <span class="n">use_todo</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1">#: The keyword placed before each event when ``use_todo`` is True.</span>
+    <span class="n">todo_keyword</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;TODO&quot;</span>
+
+    <span class="c1"># --- iCalendar --------------------------------------------------------</span>
+    <span class="c1">#: IANA time zone used for the calendar.  An empty string selects the</span>
+    <span class="c1">#: floating-time behaviour of the reference implementation.</span>
+    <span class="n">timezone</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;America/Chicago&quot;</span>
+    <span class="c1">#: PRODID advertised by the exporter.</span>
+    <span class="n">prodid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;-//Blaine Mooers//writing-schedule.py//EN&quot;</span>
+
+    <span class="c1"># --- Printable time-block sheet --------------------------------------</span>
+    <span class="n">timeblock_start_hour</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">timeblock_end_hour</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">23</span>
+    <span class="c1">#: One planned column plus (columns - 1) revision columns.</span>
+    <span class="n">timeblock_columns</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="c1">#: Writing rows per hour.</span>
+    <span class="n">timeblock_subrows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>
+
+    <span class="c1"># --- Code descriptions -----------------------------------------------</span>
+    <span class="c1">#: Standing dictionary of code -&gt; description, merged *under* a table&#39;s</span>
+    <span class="c1">#: own legend (the legend wins).  Used by the sheets, not the schedule.</span>
+    <span class="n">code_descriptions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Config.effective_legend">
+<a class="viewcode-back" href="../../api.html#writing_schedule.config.Config.effective_legend">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">effective_legend</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">legend</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Merge ``code_descriptions`` under ``legend``.</span>
+
+<span class="sd">        Entries in ``legend`` take precedence because they are specific to the</span>
+<span class="sd">        week; the configured descriptions fill in any code the legend omits.</span>
+<span class="sd">        Mirrors ``writing-schedule--effective-legend``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">have</span> <span class="o">=</span> <span class="p">{</span><span class="n">code</span> <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">legend</span><span class="p">}</span>
+        <span class="n">extra</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">desc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">code_descriptions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">have</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">legend</span><span class="p">)</span> <span class="o">+</span> <span class="n">extra</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Blaine Mooers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

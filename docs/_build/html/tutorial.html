@@ -1,0 +1,217 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial: build a schedule from an org table &mdash; writing-schedule 0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The org table format" href="org-format.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            writing-schedule
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial: build a schedule from an org table</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#step-1-scaffold-or-copy-a-table">Step 1, scaffold or copy a table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-2-generate-the-outputs">Step 2, generate the outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-3-live-with-the-week">Step 3, live with the week</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-each-output-is-for">What each output is for</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="org-format.html">The org table format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library.html">Using the library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="daylight-saving.html">Daylight saving and time zones</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">writing-schedule</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Tutorial: build a schedule from an org table</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tutorial.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial-build-a-schedule-from-an-org-table">
+<h1>Tutorial: build a schedule from an org table<a class="headerlink" href="#tutorial-build-a-schedule-from-an-org-table" title="Link to this heading"></a></h1>
+<p>The weekly table is the one file you edit. It is an ordinary org-mode table,
+so any text editor can produce it, and Emacs is not required. This walkthrough
+builds a week from scratch and turns it into the three outputs. The full
+grammar is covered in <a class="reference internal" href="org-format.html"><span class="std std-doc">The org table format</span></a>; here you only
+need the shape of a table.</p>
+<section id="step-1-scaffold-or-copy-a-table">
+<h2>Step 1, scaffold or copy a table<a class="headerlink" href="#step-1-scaffold-or-copy-a-table" title="Link to this heading"></a></h2>
+<p>To start from a blank grid, ask the tool for one and then fill in the cells:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">writing</span><span class="o">-</span><span class="n">schedule</span> <span class="n">template</span> <span class="mi">5</span> <span class="o">--</span><span class="n">out</span> <span class="n">my</span><span class="o">-</span><span class="n">week</span><span class="o">.</span><span class="n">org</span>
+</pre></div>
+</div>
+<p>That writes a blank table for five projects. You can also copy the worked
+example below, which ships as <code class="docutils literal notranslate"><span class="pre">examples/my-week.org</span></code> in the repository.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#+TITLE: My Writing Week</span>
+
+<span class="o">|</span> <span class="n">Time</span> <span class="o">&lt;</span><span class="n">l</span><span class="o">&gt;</span>    <span class="o">|</span> <span class="n">M</span>  <span class="o">|</span> <span class="n">Tu</span> <span class="o">|</span> <span class="n">W</span>  <span class="o">|</span> <span class="n">Th</span> <span class="o">|</span> <span class="n">F</span>  <span class="o">|</span> <span class="n">Sa</span> <span class="o">|</span>
+<span class="o">|-------------+----+----+----+----+----+----|</span>
+<span class="o">|</span> <span class="n">Generative</span><span class="p">:</span> <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>
+<span class="o">|</span> <span class="mi">04</span><span class="p">:</span><span class="mi">00</span><span class="o">-</span><span class="mi">05</span><span class="p">:</span><span class="mi">30</span> <span class="o">|</span> <span class="n">A</span>  <span class="o">|</span> <span class="n">B</span>  <span class="o">|</span> <span class="n">A</span>  <span class="o">|</span> <span class="n">B</span>  <span class="o">|</span> <span class="n">W</span>  <span class="o">|</span>    <span class="o">|</span>
+<span class="o">|</span> <span class="mi">05</span><span class="p">:</span><span class="mi">45</span><span class="o">-</span><span class="mi">07</span><span class="p">:</span><span class="mi">15</span> <span class="o">|</span> <span class="n">A</span>  <span class="o">|</span> <span class="n">B</span>  <span class="o">|</span> <span class="n">A</span>  <span class="o">|</span> <span class="n">B</span>  <span class="o">|</span> <span class="n">W</span>  <span class="o">|</span> <span class="n">A</span>  <span class="o">|</span>
+<span class="o">|</span> <span class="n">Rewriting</span><span class="p">:</span>  <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>
+<span class="o">|</span> <span class="mi">09</span><span class="p">:</span><span class="mi">15</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="mi">45</span> <span class="o">|</span> <span class="n">B</span>  <span class="o">|</span> <span class="n">A</span>  <span class="o">|</span> <span class="n">B</span>  <span class="o">|</span> <span class="n">A</span>  <span class="o">|</span> <span class="n">TT</span> <span class="o">|</span> <span class="n">A</span>  <span class="o">|</span>
+<span class="o">|</span> <span class="n">Supporting</span><span class="p">:</span> <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>    <span class="o">|</span>
+<span class="o">|</span> <span class="mi">13</span><span class="p">:</span><span class="mi">15</span><span class="o">-</span><span class="mi">14</span><span class="p">:</span><span class="mi">45</span> <span class="o">|</span> <span class="n">EM</span> <span class="o">|</span> <span class="n">EM</span> <span class="o">|</span> <span class="n">EM</span> <span class="o">|</span> <span class="n">EM</span> <span class="o">|</span> <span class="n">EM</span> <span class="o">|</span>    <span class="o">|</span>
+<span class="o">|-------------+----+----+----+----+----+----|</span>
+<span class="o">|</span> <span class="n">A</span><span class="p">:</span>  <span class="n">DNPH1</span> <span class="n">docking</span>    <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>
+<span class="o">|</span> <span class="n">B</span><span class="p">:</span>  <span class="n">DUSP1</span> <span class="n">radiation</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>
+<span class="o">|</span> <span class="n">W</span><span class="p">:</span>  <span class="mi">2026</span><span class="n">words</span>        <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>
+<span class="o">|</span> <span class="n">TT</span><span class="p">:</span> <span class="n">time</span> <span class="n">tracking</span>    <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>
+<span class="o">|</span> <span class="n">EM</span><span class="p">:</span> <span class="n">email</span>            <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>  <span class="o">|</span>
+</pre></div>
+</div>
+<p>The first column holds the labels, and every other column is a day. The rows
+that start with a section name, such as <code class="docutils literal notranslate"><span class="pre">Generative:</span></code>, group the blocks
+beneath them. The rows that start with a time, such as <code class="docutils literal notranslate"><span class="pre">04:00-05:30</span></code>, are the
+blocks, and each day cell under a time holds a short code. The rows at the
+bottom that start with a code and a colon, such as <code class="docutils literal notranslate"><span class="pre">A:</span> <span class="pre">DNPH1</span> <span class="pre">docking</span></code>, name
+each code.</p>
+</section>
+<section id="step-2-generate-the-outputs">
+<h2>Step 2, generate the outputs<a class="headerlink" href="#step-2-generate-the-outputs" title="Link to this heading"></a></h2>
+<p>Point the tool at your table and name any day inside the target week, because
+the week snaps to the Monday on or before that date.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">writing</span><span class="o">-</span><span class="n">schedule</span> <span class="n">generate</span> <span class="n">examples</span><span class="o">/</span><span class="n">my</span><span class="o">-</span><span class="n">week</span><span class="o">.</span><span class="n">org</span> <span class="o">--</span><span class="n">week</span> <span class="mi">2026</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">19</span> <span class="o">--</span><span class="nb">dir</span> <span class="n">out</span>
+<span class="n">writing</span><span class="o">-</span><span class="n">schedule</span> <span class="n">sheets</span>   <span class="n">examples</span><span class="o">/</span><span class="n">my</span><span class="o">-</span><span class="n">week</span><span class="o">.</span><span class="n">org</span> <span class="o">--</span><span class="n">week</span> <span class="mi">2026</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">19</span> <span class="o">--</span><span class="nb">dir</span> <span class="n">out</span> <span class="o">--</span><span class="nb">format</span> <span class="n">both</span>
+</pre></div>
+</div>
+<p>The example table holds twenty-two blocks across five codes and three
+sections, and the two commands write these files into <code class="docutils literal notranslate"><span class="pre">out/</span></code>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>File</p></th>
+<th class="head"><p>What it is</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">writing-2026-01-19.org</span></code></p></td>
+<td><p>The dated schedule, one TODO per block with an active timestamp, and a Summary of hours per code. Add it to your org agenda.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">writing-2026-01-19.ics</span></code></p></td>
+<td><p>The calendar. Import it into Google Calendar, Outlook, or Apple Calendar.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sheets-week-2026-01-19.pdf</span></code></p></td>
+<td><p>The printable sheet, two pages per day, with the plan in the first column and blank columns to revise as the day changes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sheets-week-2026-01-19.org</span></code></p></td>
+<td><p>The same week as an editable per-day org table, in case you prefer to adjust it in org before printing.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="step-3-live-with-the-week">
+<h2>Step 3, live with the week<a class="headerlink" href="#step-3-live-with-the-week" title="Link to this heading"></a></h2>
+<p>The printable sheet is meant to be revised. The first column holds the plan,
+and the remaining columns are blank, so each time the day changes you write a
+new plan in the next column. The rightmost filled column therefore records
+what actually happened, which is a record you can transcribe later.</p>
+<p>To rework a saved week, list the archive and open the file you want:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">writing</span><span class="o">-</span><span class="n">schedule</span> <span class="n">weeks</span> <span class="o">--</span><span class="nb">dir</span> <span class="n">out</span>
+</pre></div>
+</div>
+<p>The command lists the archived schedule files newest first, because ISO dates
+sort in chronological order.</p>
+</section>
+<section id="what-each-output-is-for">
+<h2>What each output is for<a class="headerlink" href="#what-each-output-is-for" title="Link to this heading"></a></h2>
+<p>The dated <code class="docutils literal notranslate"><span class="pre">.org</span></code> file feeds the org agenda, and every block is a <code class="docutils literal notranslate"><span class="pre">TODO</span></code> with an
+active timestamp, so the agenda shows your week and the clock tables can total
+your hours. The <code class="docutils literal notranslate"><span class="pre">.ics</span></code> file feeds any calendar application through a standard
+import. The PDF feeds your printer. The three share one source, so a change to
+the table changes all three the next time you run the commands.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="org-format.html" class="btn btn-neutral float-right" title="The org table format" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Blaine Mooers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

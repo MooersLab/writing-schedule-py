@@ -1,0 +1,258 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>writing_schedule.ics &mdash; writing-schedule 0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            writing-schedule
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial: build a schedule from an org table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../org-format.html">The org table format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library.html">Using the library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../daylight-saving.html">Daylight saving and time zones</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">writing-schedule</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">writing_schedule.ics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for writing_schedule.ics</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Emit an iCalendar (RFC 5545) file directly, without a third-party library.</span>
+
+<span class="sd">The reference implementation hands the generated org file to org&#39;s own</span>
+<span class="sd">exporter.  A second implementation is expected to write the small required</span>
+<span class="sd">subset itself, because a dependency-free program is easier to install.  This</span>
+<span class="sd">module produces one ``VEVENT`` per block, wrapped in a ``VCALENDAR`` with a</span>
+<span class="sd">``VTIMEZONE`` built from ``zoneinfo`` (see :mod:`writing_schedule.vtimezone`).</span>
+
+<span class="sd">Times are written as local wall-clock values with a ``TZID`` parameter, so a</span>
+<span class="sd">04:00 block stays at 04:00 in every week, and the ``VTIMEZONE`` supplies the</span>
+<span class="sd">offset a client needs to compute the absolute instant.  When no zone is</span>
+<span class="sd">configured the exporter falls back to the reference&#39;s floating-time behaviour.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_dt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Event</span><span class="p">,</span> <span class="n">ParsedTable</span><span class="p">,</span> <span class="n">map_get</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.schedule</span><span class="w"> </span><span class="kn">import</span> <span class="n">_headline</span><span class="p">,</span> <span class="n">legend_mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.vtimezone</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_vtimezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.week</span><span class="w"> </span><span class="kn">import</span> <span class="n">day_of_week</span><span class="p">,</span> <span class="n">iso_date</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_escape</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Escape a TEXT value per RFC 5545 (backslash, semicolon, comma, newline).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">;&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">,&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">n&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="fold_line">
+<a class="viewcode-back" href="../../api.html#writing_schedule.ics.fold_line">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fold_line</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fold a content line at 75 octets with CRLF + single-space continuation.&quot;&quot;&quot;</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">75</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">line</span>
+    <span class="n">pieces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">limit</span> <span class="o">=</span> <span class="mi">75</span>
+    <span class="k">while</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">):</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">limit</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">))</span>
+        <span class="c1"># Do not split a multi-byte UTF-8 sequence.</span>
+        <span class="k">while</span> <span class="n">end</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">raw</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0xC0</span><span class="p">)</span> <span class="o">==</span> <span class="mh">0x80</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">pieces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">raw</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">])</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">end</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="mi">74</span>  <span class="c1"># continuation lines start with a space, leaving 74 octets</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2"> &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pieces</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_hhmmss</span><span class="p">(</span><span class="n">hhmm</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">hhmm</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;00&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_uid</span><span class="p">(</span><span class="n">iso</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">letter</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">iso</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="n">end</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="n">letter</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="n">section</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">digest</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">20</span><span class="p">]</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">digest</span><span class="si">}</span><span class="s2">@writing-schedule.py&quot;</span>
+
+
+<div class="viewcode-block" id="build_ics">
+<a class="viewcode-back" href="../../api.html#writing_schedule.ics.build_ics">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_ics</span><span class="p">(</span>
+    <span class="n">parsed</span><span class="p">:</span> <span class="n">ParsedTable</span><span class="p">,</span>
+    <span class="n">monday</span><span class="p">:</span> <span class="n">_dt</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Config</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">calname</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dtstamp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">_dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the iCalendar text for ``parsed`` anchored at ``monday``.</span>
+
+<span class="sd">    ``dtstamp`` may be supplied for reproducible output; it defaults to the</span>
+<span class="sd">    current time in UTC.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">config</span> <span class="ow">or</span> <span class="n">Config</span><span class="p">()</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="n">legend_mapping</span><span class="p">(</span><span class="n">parsed</span><span class="o">.</span><span class="n">letters</span><span class="p">,</span> <span class="n">parsed</span><span class="o">.</span><span class="n">legend</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dtstamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dtstamp</span> <span class="o">=</span> <span class="n">_dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">_dt</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+    <span class="n">stamp</span> <span class="o">=</span> <span class="n">dtstamp</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">_dt</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">T%H%M%SZ&quot;</span><span class="p">)</span>
+    <span class="n">tzid</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">vtz</span> <span class="o">=</span> <span class="n">build_vtimezone</span><span class="p">(</span><span class="n">tzid</span><span class="p">,</span> <span class="n">monday</span><span class="o">.</span><span class="n">year</span><span class="p">)</span> <span class="k">if</span> <span class="n">tzid</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">use_tzid</span> <span class="o">=</span> <span class="n">vtz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;BEGIN:VCALENDAR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;VERSION:2.0&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;PRODID:</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">prodid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;CALSCALE:GREGORIAN&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">calname</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;X-WR-CALNAME:</span><span class="si">{</span><span class="n">_escape</span><span class="p">(</span><span class="n">calname</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tzid</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;X-WR-TIMEZONE:</span><span class="si">{</span><span class="n">tzid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;X-WR-CALDESC:</span><span class="si">{</span><span class="n">_escape</span><span class="p">(</span><span class="n">title</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">vtz</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">vtz</span><span class="p">)</span>
+
+    <span class="c1"># Duplicate-key counter so identical blocks still get distinct UIDs.</span>
+    <span class="n">seen</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">parsed</span><span class="o">.</span><span class="n">events</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">day_of_week</span><span class="p">(</span><span class="n">monday</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+        <span class="n">iso</span> <span class="o">=</span> <span class="n">iso_date</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">iso</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">letter</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">section</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">seen</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">seen</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># Overnight block: roll the end to the next day.</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">end</span> <span class="o">&lt;=</span> <span class="n">ev</span><span class="o">.</span><span class="n">start</span><span class="p">:</span>
+            <span class="n">end_date</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">_dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">entry</span> <span class="o">=</span> <span class="n">map_get</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">letter</span><span class="p">)</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">_headline</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">letter</span><span class="p">)</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_escape</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">letter</span><span class="p">)</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">_escape</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">section</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="n">use_tzid</span><span class="p">:</span>
+            <span class="n">dtstart</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DTSTART;TZID=</span><span class="si">{</span><span class="n">tzid</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">iso</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">T</span><span class="si">{</span><span class="n">_hhmmss</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">start</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">dtend</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DTEND;TZID=</span><span class="si">{</span><span class="n">tzid</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">iso_date</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">T</span><span class="si">{</span><span class="n">_hhmmss</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">end</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dtstart</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DTSTART:</span><span class="si">{</span><span class="n">iso</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">T</span><span class="si">{</span><span class="n">_hhmmss</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">start</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">dtend</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DTEND:</span><span class="si">{</span><span class="n">iso_date</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">T</span><span class="si">{</span><span class="n">_hhmmss</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">end</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span>
+            <span class="s2">&quot;BEGIN:VEVENT&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;UID:</span><span class="si">{</span><span class="n">_uid</span><span class="p">(</span><span class="n">iso</span><span class="p">,</span><span class="w"> </span><span class="n">ev</span><span class="o">.</span><span class="n">start</span><span class="p">,</span><span class="w"> </span><span class="n">ev</span><span class="o">.</span><span class="n">end</span><span class="p">,</span><span class="w"> </span><span class="n">ev</span><span class="o">.</span><span class="n">letter</span><span class="p">,</span><span class="w"> </span><span class="n">ev</span><span class="o">.</span><span class="n">section</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;DTSTAMP:</span><span class="si">{</span><span class="n">stamp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">dtstart</span><span class="p">,</span>
+            <span class="n">dtend</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;SUMMARY:</span><span class="si">{</span><span class="n">_escape</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;DESCRIPTION:</span><span class="si">{</span><span class="n">_escape</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">start</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39;-&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ev</span><span class="o">.</span><span class="n">end</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;CATEGORIES:</span><span class="si">{</span><span class="n">categories</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;END:VEVENT&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;END:VCALENDAR&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fold_line</span><span class="p">(</span><span class="n">ln</span><span class="p">)</span> <span class="k">for</span> <span class="n">ln</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Blaine Mooers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

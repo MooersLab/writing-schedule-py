@@ -1,0 +1,218 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Development &mdash; writing-schedule 0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="API reference" href="api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            writing-schedule
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial: build a schedule from an org table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="org-format.html">The org table format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library.html">Using the library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="daylight-saving.html">Daylight saving and time zones</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#testing-and-parity">Testing and parity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-makefile">The Makefile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-these-docs">Building these docs</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">writing-schedule</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Development</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/development.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="development">
+<h1>Development<a class="headerlink" href="#development" title="Link to this heading"></a></h1>
+<p>This page covers the test suite, the parity fixtures, and the Makefile. The
+package is small and dependency-light, so a working session needs only a
+checkout and an editable install.</p>
+<section id="testing-and-parity">
+<h2>Testing and parity<a class="headerlink" href="#testing-and-parity" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;.[test]&quot;</span>
+<span class="n">pytest</span>
+</pre></div>
+</div>
+<p>The suite has several layers. <code class="docutils literal notranslate"><span class="pre">tests/test_writing_schedule.py</span></code> ports the Emacs
+ERT suite to pytest and keeps the same test names, so the two suites read side
+by side. <code class="docutils literal notranslate"><span class="pre">tests/test_parity.py</span></code> asserts that the parser finds forty-four events
+with the correct codes, offsets, and times in the canonical fixture, which is
+the hardest shared contract. <code class="docutils literal notranslate"><span class="pre">tests/test_ics.py</span></code> covers the calendar subset and
+daylight saving, and <code class="docutils literal notranslate"><span class="pre">tests/test_sheet.py</span></code> checks the PDF page count and the
+block-box geometry, because byte comparison across two rendering engines is not
+realistic.</p>
+<p><code class="docutils literal notranslate"><span class="pre">tests/test_frozen_fixtures.py</span></code> is the tuning fork. It diffs the Python schedule
+<code class="docutils literal notranslate"><span class="pre">.org</span></code> and week <code class="docutils literal notranslate"><span class="pre">.org</span></code> byte-for-byte against output frozen from the elisp
+reference, so the two implementations stay aligned to a fixed reference rather
+than to each other. The calendar is checked two ways, namely a byte-for-byte
+match against a frozen Python golden and a semantic match against the elisp
+<code class="docutils literal notranslate"><span class="pre">ox-icalendar</span></code> export that compares the set of events by local start, local
+end, summary, and categories. The frozen files and their provenance live in
+<code class="docutils literal notranslate"><span class="pre">tests/fixtures/expected/</span></code>.</p>
+</section>
+<section id="the-makefile">
+<h2>The Makefile<a class="headerlink" href="#the-makefile" title="Link to this heading"></a></h2>
+<p>The repository ships a <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> that wraps the common tasks. Run <code class="docutils literal notranslate"><span class="pre">make</span></code> with
+no target, or <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">help</span></code>, to list them.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Target</p></th>
+<th class="head"><p>What it does</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">dev</span></code></p></td>
+<td><p>Install the package in editable mode with the test extras.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code></p></td>
+<td><p>Run the pytest suite.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">coverage</span></code></p></td>
+<td><p>Run the tests with a line-coverage report.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">lint</span></code></p></td>
+<td><p>Lint with ruff when it is installed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">demo</span></code></p></td>
+<td><p>Generate the schedule, calendar, and sheets from an example table into <code class="docutils literal notranslate"><span class="pre">out/</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">build</span></code></p></td>
+<td><p>Build the sdist and wheel into <code class="docutils literal notranslate"><span class="pre">dist/</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">check</span></code></p></td>
+<td><p>Build, then validate the distributions with twine.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">publish-test</span></code></p></td>
+<td><p>Upload to TestPyPI.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">publish</span></code></p></td>
+<td><p>Upload to PyPI.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">reference</span></code></p></td>
+<td><p>Refresh the frozen elisp fixtures from Emacs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code></p></td>
+<td><p>Remove caches, build artifacts, and the demo output.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The demo reads its inputs from variables, so it can point at any table and
+week:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">demo</span> <span class="n">TABLE</span><span class="o">=</span><span class="n">examples</span><span class="o">/</span><span class="n">my</span><span class="o">-</span><span class="n">week</span><span class="o">.</span><span class="n">org</span> <span class="n">WEEK</span><span class="o">=</span><span class="mi">2026</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">02</span> <span class="n">OUT</span><span class="o">=</span><span class="n">build</span><span class="o">/</span><span class="n">demo</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">reference</span></code> target needs Emacs and the path to the elisp package, because
+it runs the reference implementation to rewrite the files in
+<code class="docutils literal notranslate"><span class="pre">tests/fixtures/expected/</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">reference</span> <span class="n">WS_EL</span><span class="o">=../</span><span class="n">writing</span><span class="o">-</span><span class="n">schedule</span><span class="o">.</span><span class="n">el</span>
+</pre></div>
+</div>
+</section>
+<section id="building-these-docs">
+<h2>Building these docs<a class="headerlink" href="#building-these-docs" title="Link to this heading"></a></h2>
+<p>The documentation is a Sphinx project under <code class="docutils literal notranslate"><span class="pre">docs/</span></code>. Build it locally with the
+documentation requirements installed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">docs</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+<span class="n">sphinx</span><span class="o">-</span><span class="n">build</span> <span class="o">-</span><span class="n">b</span> <span class="n">html</span> <span class="n">docs</span> <span class="n">docs</span><span class="o">/</span><span class="n">_build</span><span class="o">/</span><span class="n">html</span>
+</pre></div>
+</div>
+<p>Read the Docs builds the same project from <code class="docutils literal notranslate"><span class="pre">.readthedocs.yaml</span></code>, which installs
+the package so autodoc can import it, installs <code class="docutils literal notranslate"><span class="pre">docs/requirements.txt</span></code>, and
+fails the build on any warning.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api.html" class="btn btn-neutral float-left" title="API reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Blaine Mooers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,760 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API reference &mdash; writing-schedule 0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Development" href="development.html" />
+    <link rel="prev" title="Daylight saving and time zones" href="daylight-saving.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            writing-schedule
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial: build a schedule from an org table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="org-format.html">The org table format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library.html">Using the library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="daylight-saving.html">Daylight saving and time zones</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-writing_schedule.orgtable">Parsing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.orgtable.HLINE"><code class="docutils literal notranslate"><span class="pre">HLINE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.orgtable.split_row"><code class="docutils literal notranslate"><span class="pre">split_row()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.orgtable.parse_org_table"><code class="docutils literal notranslate"><span class="pre">parse_org_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.parser.day_offset"><code class="docutils literal notranslate"><span class="pre">day_offset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.parser.parse_time"><code class="docutils literal notranslate"><span class="pre">parse_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.parser.minutes_between"><code class="docutils literal notranslate"><span class="pre">minutes_between()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.parser.parse_table"><code class="docutils literal notranslate"><span class="pre">parse_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.parser.parse_text"><code class="docutils literal notranslate"><span class="pre">parse_text()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.model.Event"><code class="docutils literal notranslate"><span class="pre">Event</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.Event.section"><code class="docutils literal notranslate"><span class="pre">Event.section</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.Event.offset"><code class="docutils literal notranslate"><span class="pre">Event.offset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.Event.start"><code class="docutils literal notranslate"><span class="pre">Event.start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.Event.end"><code class="docutils literal notranslate"><span class="pre">Event.end</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.Event.letter"><code class="docutils literal notranslate"><span class="pre">Event.letter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.model.ParsedTable"><code class="docutils literal notranslate"><span class="pre">ParsedTable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.ParsedTable.events"><code class="docutils literal notranslate"><span class="pre">ParsedTable.events</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.ParsedTable.legend"><code class="docutils literal notranslate"><span class="pre">ParsedTable.legend</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.ParsedTable.letters"><code class="docutils literal notranslate"><span class="pre">ParsedTable.letters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.ParsedTable.columns"><code class="docutils literal notranslate"><span class="pre">ParsedTable.columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.ParsedTable.legend_lookup"><code class="docutils literal notranslate"><span class="pre">ParsedTable.legend_lookup()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.model.MapEntry"><code class="docutils literal notranslate"><span class="pre">MapEntry</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.MapEntry.letter"><code class="docutils literal notranslate"><span class="pre">MapEntry.letter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.MapEntry.code"><code class="docutils literal notranslate"><span class="pre">MapEntry.code</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.model.MapEntry.desc"><code class="docutils literal notranslate"><span class="pre">MapEntry.desc</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.model.map_get"><code class="docutils literal notranslate"><span class="pre">map_get()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-writing_schedule.week">Dates</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.week.to_date"><code class="docutils literal notranslate"><span class="pre">to_date()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.week.week_monday"><code class="docutils literal notranslate"><span class="pre">week_monday()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.week.iso_date"><code class="docutils literal notranslate"><span class="pre">iso_date()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.week.day_of_week"><code class="docutils literal notranslate"><span class="pre">day_of_week()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.week.timestamp"><code class="docutils literal notranslate"><span class="pre">timestamp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-writing_schedule.schedule">Schedule and calendar</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.schedule.legend_mapping"><code class="docutils literal notranslate"><span class="pre">legend_mapping()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.schedule.build_org"><code class="docutils literal notranslate"><span class="pre">build_org()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.schedule.summary"><code class="docutils literal notranslate"><span class="pre">summary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.schedule.schedule_title"><code class="docutils literal notranslate"><span class="pre">schedule_title()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.schedule.generate_schedule"><code class="docutils literal notranslate"><span class="pre">generate_schedule()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.schedule.schedule_filename"><code class="docutils literal notranslate"><span class="pre">schedule_filename()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.ics.fold_line"><code class="docutils literal notranslate"><span class="pre">fold_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.ics.build_ics"><code class="docutils literal notranslate"><span class="pre">build_ics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.vtimezone.build_vtimezone"><code class="docutils literal notranslate"><span class="pre">build_vtimezone()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-writing_schedule.sheet">Sheets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.sheet.block_box"><code class="docutils literal notranslate"><span class="pre">block_box()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.sheet.render_week_pdf"><code class="docutils literal notranslate"><span class="pre">render_week_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.sheet.render_day_pdf"><code class="docutils literal notranslate"><span class="pre">render_day_pdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.sheet_common.tidy"><code class="docutils literal notranslate"><span class="pre">tidy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.sheet_common.page_split"><code class="docutils literal notranslate"><span class="pre">page_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.sheet_common.block_rows"><code class="docutils literal notranslate"><span class="pre">block_rows()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.sheet_common.block_hours"><code class="docutils literal notranslate"><span class="pre">block_hours()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.sheet_common.iter_days"><code class="docutils literal notranslate"><span class="pre">iter_days()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.sheet_common.key_pairs"><code class="docutils literal notranslate"><span class="pre">key_pairs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.sheet_latex.latex_escape"><code class="docutils literal notranslate"><span class="pre">latex_escape()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.sheet_latex.render_latex"><code class="docutils literal notranslate"><span class="pre">render_latex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.sheet_org.build_week_org"><code class="docutils literal notranslate"><span class="pre">build_week_org()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-writing_schedule.config">Configuration and utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.config.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.config.Config.use_todo"><code class="docutils literal notranslate"><span class="pre">Config.use_todo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.config.Config.todo_keyword"><code class="docutils literal notranslate"><span class="pre">Config.todo_keyword</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.config.Config.timezone"><code class="docutils literal notranslate"><span class="pre">Config.timezone</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.config.Config.prodid"><code class="docutils literal notranslate"><span class="pre">Config.prodid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.config.Config.timeblock_start_hour"><code class="docutils literal notranslate"><span class="pre">Config.timeblock_start_hour</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.config.Config.timeblock_end_hour"><code class="docutils literal notranslate"><span class="pre">Config.timeblock_end_hour</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.config.Config.timeblock_columns"><code class="docutils literal notranslate"><span class="pre">Config.timeblock_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.config.Config.timeblock_subrows"><code class="docutils literal notranslate"><span class="pre">Config.timeblock_subrows</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.config.Config.code_descriptions"><code class="docutils literal notranslate"><span class="pre">Config.code_descriptions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#writing_schedule.config.Config.effective_legend"><code class="docutils literal notranslate"><span class="pre">Config.effective_legend()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.template.template_string"><code class="docutils literal notranslate"><span class="pre">template_string()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.archive.archived_weeks"><code class="docutils literal notranslate"><span class="pre">archived_weeks()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-writing_schedule.cli">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.cli.build_parser"><code class="docutils literal notranslate"><span class="pre">build_parser()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing_schedule.cli.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">writing-schedule</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<p>This page documents the public modules. The everyday names, such as
+<code class="docutils literal notranslate"><span class="pre">parse_text</span></code>, <code class="docutils literal notranslate"><span class="pre">generate_schedule</span></code>, <code class="docutils literal notranslate"><span class="pre">build_ics</span></code>, and <code class="docutils literal notranslate"><span class="pre">render_week_pdf</span></code>, are
+re-exported from the top-level <code class="docutils literal notranslate"><span class="pre">writing_schedule</span></code> package, and their canonical
+definitions are shown below under the module that owns them.</p>
+<section id="module-writing_schedule.orgtable">
+<span id="parsing"></span><h2>Parsing<a class="headerlink" href="#module-writing_schedule.orgtable" title="Link to this heading"></a></h2>
+<p>Read an org table from text into rows of cells.</p>
+<p>This is the Python stand-in for elisp <code class="docutils literal notranslate"><span class="pre">org-table-to-lisp</span></code>.  It finds the
+first contiguous run of table lines (those starting, after optional leading
+whitespace, with <code class="docutils literal notranslate"><span class="pre">|</span></code>) and returns a list whose elements are either the
+sentinel <a class="reference internal" href="#writing_schedule.orgtable.HLINE" title="writing_schedule.orgtable.HLINE"><code class="xref py py-data docutils literal notranslate"><span class="pre">HLINE</span></code></a> for a horizontal rule or a list of trimmed cell
+strings for a data row.</p>
+<p>A horizontal rule is any table line whose first character after the leading
+<code class="docutils literal notranslate"><span class="pre">|</span></code> is <code class="docutils literal notranslate"><span class="pre">-</span></code> or <code class="docutils literal notranslate"><span class="pre">+</span></code>, matching org’s <code class="docutils literal notranslate"><span class="pre">org-table-hline-p</span></code>.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="writing_schedule.orgtable.HLINE">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.orgtable.</span></span><span class="sig-name descname"><span class="pre">HLINE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'__HLINE__'</span></em><a class="headerlink" href="#writing_schedule.orgtable.HLINE" title="Link to this definition"></a></dt>
+<dd><p>Sentinel marking a horizontal rule row (elisp returns the symbol <code class="docutils literal notranslate"><span class="pre">hline</span></code>).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.orgtable.split_row">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.orgtable.</span></span><span class="sig-name descname"><span class="pre">split_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/writing_schedule/orgtable.html#split_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.orgtable.split_row" title="Link to this definition"></a></dt>
+<dd><p>Split one <code class="docutils literal notranslate"><span class="pre">|</span> <span class="pre">a</span> <span class="pre">|</span> <span class="pre">b</span> <span class="pre">|</span></code> line into trimmed cells <code class="docutils literal notranslate"><span class="pre">[&quot;a&quot;,</span> <span class="pre">&quot;b&quot;]</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.orgtable.parse_org_table">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.orgtable.</span></span><span class="sig-name descname"><span class="pre">parse_org_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/writing_schedule/orgtable.html#parse_org_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.orgtable.parse_org_table" title="Link to this definition"></a></dt>
+<dd><p>Return the first org table in <code class="docutils literal notranslate"><span class="pre">text</span></code> as a list of rows.</p>
+<p>Each row is either <a class="reference internal" href="#writing_schedule.orgtable.HLINE" title="writing_schedule.orgtable.HLINE"><code class="xref py py-data docutils literal notranslate"><span class="pre">HLINE</span></code></a> or a list of trimmed cell strings.  Lines
+outside the first table run are ignored, so a table embedded in a larger
+org document parses cleanly.</p>
+</dd></dl>
+
+<p id="module-writing_schedule.parser">Parse a weekly block table into a <code class="xref py py-class docutils literal notranslate"><span class="pre">ParsedTable</span></code>.</p>
+<p>This is a direct port of <code class="docutils literal notranslate"><span class="pre">writing-schedule--parse</span></code> plus its helpers.  The
+four row kinds (header, legend, time-block, section header) are tested in that
+order and the first match wins, exactly as in the reference.  See the format
+spec sections “The weekly block table”.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.parser.day_offset">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.parser.</span></span><span class="sig-name descname"><span class="pre">day_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/writing_schedule/parser.html#day_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.parser.day_offset" title="Link to this definition"></a></dt>
+<dd><p>Return the Monday offset for <code class="docutils literal notranslate"><span class="pre">cell</span></code> when it names a day, else None.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.parser.parse_time">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.parser.</span></span><span class="sig-name descname"><span class="pre">parse_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/writing_schedule/parser.html#parse_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.parser.parse_time" title="Link to this definition"></a></dt>
+<dd><p>Return (start, end) as zero-padded <code class="docutils literal notranslate"><span class="pre">HH:MM</span></code> strings, or None.</p>
+<p>The range may appear anywhere inside the cell.  No range checking is done,
+matching the reference; callers may validate separately.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.parser.minutes_between">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.parser.</span></span><span class="sig-name descname"><span class="pre">minutes_between</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/writing_schedule/parser.html#minutes_between"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.parser.minutes_between" title="Link to this definition"></a></dt>
+<dd><p>Return the number of minutes between two <code class="docutils literal notranslate"><span class="pre">HH:MM</span></code> strings.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.parser.parse_table">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.parser.</span></span><span class="sig-name descname"><span class="pre">parse_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#writing_schedule.model.ParsedTable" title="writing_schedule.model.ParsedTable"><span class="pre">ParsedTable</span></a></span></span><a class="reference internal" href="_modules/writing_schedule/parser.html#parse_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.parser.parse_table" title="Link to this definition"></a></dt>
+<dd><p>Parse table <code class="docutils literal notranslate"><span class="pre">rows</span></code> (from <code class="xref py py-func docutils literal notranslate"><span class="pre">parse_org_table()</span></code>) into a ParsedTable.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.parser.parse_text">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.parser.</span></span><span class="sig-name descname"><span class="pre">parse_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#writing_schedule.model.ParsedTable" title="writing_schedule.model.ParsedTable"><span class="pre">ParsedTable</span></a></span></span><a class="reference internal" href="_modules/writing_schedule/parser.html#parse_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.parser.parse_text" title="Link to this definition"></a></dt>
+<dd><p>Convenience: read the first org table in <code class="docutils literal notranslate"><span class="pre">text</span></code> and parse it.</p>
+</dd></dl>
+
+<p id="module-writing_schedule.model">Data model for the writing-schedule Python port.</p>
+<p>The types here mirror the plists produced by <code class="docutils literal notranslate"><span class="pre">writing-schedule.el</span></code>:</p>
+<ul class="simple">
+<li><p>An <a class="reference internal" href="#writing_schedule.model.Event" title="writing_schedule.model.Event"><code class="xref py py-class docutils literal notranslate"><span class="pre">Event</span></code></a> corresponds to a parsed time block.  Its five fields match
+the reference plist keys <code class="docutils literal notranslate"><span class="pre">:section</span></code>, <code class="docutils literal notranslate"><span class="pre">:offset</span></code>, <code class="docutils literal notranslate"><span class="pre">:start</span></code>, <code class="docutils literal notranslate"><span class="pre">:end</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">:letter</span></code> (see the format spec, table <code class="docutils literal notranslate"><span class="pre">tab:event</span></code>).</p></li>
+<li><p>A <a class="reference internal" href="#writing_schedule.model.ParsedTable" title="writing_schedule.model.ParsedTable"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParsedTable</span></code></a> corresponds to the plist returned by
+<code class="docutils literal notranslate"><span class="pre">writing-schedule--parse</span></code> with keys <code class="docutils literal notranslate"><span class="pre">:events</span></code>, <code class="docutils literal notranslate"><span class="pre">:legend</span></code>,
+<code class="docutils literal notranslate"><span class="pre">:letters</span></code>, and <code class="docutils literal notranslate"><span class="pre">:columns</span></code>.</p></li>
+<li><p>A <a class="reference internal" href="#writing_schedule.model.MapEntry" title="writing_schedule.model.MapEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapEntry</span></code></a> corresponds to the mapping plists with keys
+<code class="docutils literal notranslate"><span class="pre">:letter</span></code>, <code class="docutils literal notranslate"><span class="pre">:code</span></code>, and <code class="docutils literal notranslate"><span class="pre">:desc</span></code>.</p></li>
+</ul>
+<dl class="py class">
+<dt class="sig sig-object py" id="writing_schedule.model.Event">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">writing_schedule.model.</span></span><span class="sig-name descname"><span class="pre">Event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">letter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/writing_schedule/model.html#Event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.model.Event" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>One time block on one day.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>str</em>) – The most recent section header, or <code class="docutils literal notranslate"><span class="pre">&quot;Writing&quot;</span></code> before any header.</p></li>
+<li><p><strong>offset</strong> (<em>int</em>) – Days from Monday (0 = Monday … 6 = Sunday).</p></li>
+<li><p><strong>end</strong> (<em>start</em><em>,</em>) – Zero-padded <code class="docutils literal notranslate"><span class="pre">HH:MM</span></code> strings.</p></li>
+<li><p><strong>letter</strong> (<em>str</em>) – The upper-cased code taken from the day cell.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.model.Event.section">
+<span class="sig-name descname"><span class="pre">section</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#writing_schedule.model.Event.section" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.model.Event.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#writing_schedule.model.Event.offset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.model.Event.start">
+<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#writing_schedule.model.Event.start" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.model.Event.end">
+<span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#writing_schedule.model.Event.end" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.model.Event.letter">
+<span class="sig-name descname"><span class="pre">letter</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#writing_schedule.model.Event.letter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="writing_schedule.model.ParsedTable">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">writing_schedule.model.</span></span><span class="sig-name descname"><span class="pre">ParsedTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events:</span> <span class="pre">~typing.List[~writing_schedule.model.Event]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend:</span> <span class="pre">~typing.List[~typing.Tuple[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">letters:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns:</span> <span class="pre">~typing.List[~typing.Tuple[int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int]]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/writing_schedule/model.html#ParsedTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.model.ParsedTable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The result of parsing a weekly block table.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.model.ParsedTable.events">
+<span class="sig-name descname"><span class="pre">events</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#writing_schedule.model.Event" title="writing_schedule.model.Event"><span class="pre">Event</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#writing_schedule.model.ParsedTable.events" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.model.ParsedTable.legend">
+<span class="sig-name descname"><span class="pre">legend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#writing_schedule.model.ParsedTable.legend" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.model.ParsedTable.letters">
+<span class="sig-name descname"><span class="pre">letters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#writing_schedule.model.ParsedTable.letters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.model.ParsedTable.columns">
+<span class="sig-name descname"><span class="pre">columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#writing_schedule.model.ParsedTable.columns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="writing_schedule.model.ParsedTable.legend_lookup">
+<span class="sig-name descname"><span class="pre">legend_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/writing_schedule/model.html#ParsedTable.legend_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.model.ParsedTable.legend_lookup" title="Link to this definition"></a></dt>
+<dd><p>Return the first description for <code class="docutils literal notranslate"><span class="pre">code</span></code> in the legend, or <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p>This mirrors elisp <code class="docutils literal notranslate"><span class="pre">assoc</span></code>, which returns the first matching entry.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="writing_schedule.model.MapEntry">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">writing_schedule.model.</span></span><span class="sig-name descname"><span class="pre">MapEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">letter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/writing_schedule/model.html#MapEntry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.model.MapEntry" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Assignment of a project to a code.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.model.MapEntry.letter">
+<span class="sig-name descname"><span class="pre">letter</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#writing_schedule.model.MapEntry.letter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.model.MapEntry.code">
+<span class="sig-name descname"><span class="pre">code</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#writing_schedule.model.MapEntry.code" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.model.MapEntry.desc">
+<span class="sig-name descname"><span class="pre">desc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#writing_schedule.model.MapEntry.desc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.model.map_get">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.model.</span></span><span class="sig-name descname"><span class="pre">map_get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#writing_schedule.model.MapEntry" title="writing_schedule.model.MapEntry"><span class="pre">MapEntry</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">letter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#writing_schedule.model.MapEntry" title="writing_schedule.model.MapEntry"><span class="pre">MapEntry</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/writing_schedule/model.html#map_get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.model.map_get" title="Link to this definition"></a></dt>
+<dd><p>Return the mapping entry for <code class="docutils literal notranslate"><span class="pre">letter</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+</section>
+<section id="module-writing_schedule.week">
+<span id="dates"></span><h2>Dates<a class="headerlink" href="#module-writing_schedule.week" title="Link to this heading"></a></h2>
+<p>Date helpers.</p>
+<p>These use <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code> rather than the reference’s absolute day
+numbers, which is cleaner in Python and gives the same results.  English
+weekday names are emitted for predictability across machines, as the format
+spec recommends.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.week.to_date">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.week.</span></span><span class="sig-name descname"><span class="pre">to_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">date</span></span></span><a class="reference internal" href="_modules/writing_schedule/week.html#to_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.week.to_date" title="Link to this definition"></a></dt>
+<dd><p>Coerce an ISO date string or <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code> to a date.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.week.week_monday">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.week.</span></span><span class="sig-name descname"><span class="pre">week_monday</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">date</span></span></span><a class="reference internal" href="_modules/writing_schedule/week.html#week_monday"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.week.week_monday" title="Link to this definition"></a></dt>
+<dd><p>Return the Monday on or before <code class="docutils literal notranslate"><span class="pre">value</span></code>.</p>
+<p>Any day in a week therefore selects that week.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.week.iso_date">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.week.</span></span><span class="sig-name descname"><span class="pre">iso_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/week.html#iso_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.week.iso_date" title="Link to this definition"></a></dt>
+<dd><p>Return the ISO date string, e.g. <code class="docutils literal notranslate"><span class="pre">2026-01-19</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.week.day_of_week">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.week.</span></span><span class="sig-name descname"><span class="pre">day_of_week</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monday</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">date</span></span></span><a class="reference internal" href="_modules/writing_schedule/week.html#day_of_week"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.week.day_of_week" title="Link to this definition"></a></dt>
+<dd><p>Return the date <code class="docutils literal notranslate"><span class="pre">offset</span></code> days after <code class="docutils literal notranslate"><span class="pre">monday</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.week.timestamp">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.week.</span></span><span class="sig-name descname"><span class="pre">timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monday</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/week.html#timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.week.timestamp" title="Link to this definition"></a></dt>
+<dd><p>Build an org active timestamp for a block.</p>
+<p>Form: <code class="docutils literal notranslate"><span class="pre">&lt;YYYY-MM-DD</span> <span class="pre">Dow</span> <span class="pre">HH:MM-HH:MM&gt;</span></code>.</p>
+</dd></dl>
+
+</section>
+<section id="module-writing_schedule.schedule">
+<span id="schedule-and-calendar"></span><h2>Schedule and calendar<a class="headerlink" href="#module-writing_schedule.schedule" title="Link to this heading"></a></h2>
+<p>Generate the dated schedule <code class="docutils literal notranslate"><span class="pre">.org</span></code> file and its Summary section.</p>
+<p>Ports <code class="docutils literal notranslate"><span class="pre">writing-schedule--build-org</span></code> and <code class="docutils literal notranslate"><span class="pre">writing-schedule--summary</span></code> plus
+the batch mapping helper.  See the format spec, “The generated schedule file”.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.schedule.legend_mapping">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.schedule.</span></span><span class="sig-name descname"><span class="pre">legend_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">letters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#writing_schedule.model.MapEntry" title="writing_schedule.model.MapEntry"><span class="pre">MapEntry</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/writing_schedule/schedule.html#legend_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.schedule.legend_mapping" title="Link to this definition"></a></dt>
+<dd><p>Build a non-interactive mapping for <code class="docutils literal notranslate"><span class="pre">letters</span></code> from <code class="docutils literal notranslate"><span class="pre">legend</span></code>.</p>
+<p>Each entry has an empty code and a description taken from the legend, so
+batch generation needs no prompts.  Mirrors
+<code class="docutils literal notranslate"><span class="pre">writing-schedule--legend-mapping</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.schedule.build_org">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.schedule.</span></span><span class="sig-name descname"><span class="pre">build_org</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#writing_schedule.model.Event" title="writing_schedule.model.Event"><span class="pre">Event</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#writing_schedule.model.MapEntry" title="writing_schedule.model.MapEntry"><span class="pre">MapEntry</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monday</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.config.Config" title="writing_schedule.config.Config"><span class="pre">Config</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/schedule.html#build_org"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.schedule.build_org" title="Link to this definition"></a></dt>
+<dd><p>Return the schedule org file body (without the Summary section).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.schedule.summary">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.schedule.</span></span><span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#writing_schedule.model.Event" title="writing_schedule.model.Event"><span class="pre">Event</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#writing_schedule.model.MapEntry" title="writing_schedule.model.MapEntry"><span class="pre">MapEntry</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/schedule.html#summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.schedule.summary" title="Link to this definition"></a></dt>
+<dd><p>Return an org Summary section totalling weekly hours per code.</p>
+<p>The section carries no timestamp, so a calendar exporter skips it.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.schedule.schedule_title">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.schedule.</span></span><span class="sig-name descname"><span class="pre">schedule_title</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monday</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/schedule.html#schedule_title"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.schedule.schedule_title" title="Link to this definition"></a></dt>
+<dd><p>The default schedule title, e.g. <code class="docutils literal notranslate"><span class="pre">Writing</span> <span class="pre">Schedule</span> <span class="pre">(week</span> <span class="pre">of</span> <span class="pre">...)</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.schedule.generate_schedule">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.schedule.</span></span><span class="sig-name descname"><span class="pre">generate_schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parsed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.model.ParsedTable" title="writing_schedule.model.ParsedTable"><span class="pre">ParsedTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">week</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.config.Config" title="writing_schedule.config.Config"><span class="pre">Config</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/writing_schedule/schedule.html#generate_schedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.schedule.generate_schedule" title="Link to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">(monday,</span> <span class="pre">title,</span> <span class="pre">body)</span></code> for the schedule file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">week</span></code> is any date (or ISO string) inside the target week; it snaps to
+the Monday.  <code class="docutils literal notranslate"><span class="pre">body</span></code> is the full file text including the Summary section.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.schedule.schedule_filename">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.schedule.</span></span><span class="sig-name descname"><span class="pre">schedule_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monday</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/schedule.html#schedule_filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.schedule.schedule_filename" title="Link to this definition"></a></dt>
+<dd><p>Return the archival file name for the week beginning <code class="docutils literal notranslate"><span class="pre">monday</span></code>.</p>
+</dd></dl>
+
+<p id="module-writing_schedule.ics">Emit an iCalendar (RFC 5545) file directly, without a third-party library.</p>
+<p>The reference implementation hands the generated org file to org’s own
+exporter.  A second implementation is expected to write the small required
+subset itself, because a dependency-free program is easier to install.  This
+module produces one <code class="docutils literal notranslate"><span class="pre">VEVENT</span></code> per block, wrapped in a <code class="docutils literal notranslate"><span class="pre">VCALENDAR</span></code> with a
+<code class="docutils literal notranslate"><span class="pre">VTIMEZONE</span></code> built from <code class="docutils literal notranslate"><span class="pre">zoneinfo</span></code> (see <a class="reference internal" href="#module-writing_schedule.vtimezone" title="writing_schedule.vtimezone"><code class="xref py py-mod docutils literal notranslate"><span class="pre">writing_schedule.vtimezone</span></code></a>).</p>
+<p>Times are written as local wall-clock values with a <code class="docutils literal notranslate"><span class="pre">TZID</span></code> parameter, so a
+04:00 block stays at 04:00 in every week, and the <code class="docutils literal notranslate"><span class="pre">VTIMEZONE</span></code> supplies the
+offset a client needs to compute the absolute instant.  When no zone is
+configured the exporter falls back to the reference’s floating-time behaviour.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.ics.fold_line">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.ics.</span></span><span class="sig-name descname"><span class="pre">fold_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/ics.html#fold_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.ics.fold_line" title="Link to this definition"></a></dt>
+<dd><p>Fold a content line at 75 octets with CRLF + single-space continuation.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.ics.build_ics">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.ics.</span></span><span class="sig-name descname"><span class="pre">build_ics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parsed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.model.ParsedTable" title="writing_schedule.model.ParsedTable"><span class="pre">ParsedTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monday</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.config.Config" title="writing_schedule.config.Config"><span class="pre">Config</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtstamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/ics.html#build_ics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.ics.build_ics" title="Link to this definition"></a></dt>
+<dd><p>Return the iCalendar text for <code class="docutils literal notranslate"><span class="pre">parsed</span></code> anchored at <code class="docutils literal notranslate"><span class="pre">monday</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">dtstamp</span></code> may be supplied for reproducible output; it defaults to the
+current time in UTC.</p>
+</dd></dl>
+
+<p id="module-writing_schedule.vtimezone">Build an RFC 5545 VTIMEZONE component from a named zone via <code class="docutils literal notranslate"><span class="pre">zoneinfo</span></code>.</p>
+<p>The reference implementation writes floating local times and names the zone
+only through the <code class="docutils literal notranslate"><span class="pre">X-WR-TIMEZONE</span></code> vendor property.  The format spec recommends
+attaching an explicit <code class="docutils literal notranslate"><span class="pre">TZID</span></code> to each <code class="docutils literal notranslate"><span class="pre">DTSTART</span></code>/<code class="docutils literal notranslate"><span class="pre">DTEND</span></code> and shipping a
+<code class="docutils literal notranslate"><span class="pre">VTIMEZONE</span></code> so the times are unambiguous.  This module derives that
+<code class="docutils literal notranslate"><span class="pre">VTIMEZONE</span></code> from the standard-library <code class="docutils literal notranslate"><span class="pre">zoneinfo</span></code> database, so daylight
+saving is correct without hard-coded offsets.</p>
+<p>The daylight-saving transitions for the given year are located by probing the
+zone, and each observance carries a <code class="docutils literal notranslate"><span class="pre">RRULE</span></code> derived from the transition’s
+month and weekday position (for example the second Sunday of March), which is
+how nearly every civil zone expresses its rule.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.vtimezone.build_vtimezone">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.vtimezone.</span></span><span class="sig-name descname"><span class="pre">build_vtimezone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tzname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/writing_schedule/vtimezone.html#build_vtimezone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.vtimezone.build_vtimezone" title="Link to this definition"></a></dt>
+<dd><p>Return the VTIMEZONE as unfolded content lines, or None if unavailable.</p>
+</dd></dl>
+
+</section>
+<section id="module-writing_schedule.sheet">
+<span id="sheets"></span><h2>Sheets<a class="headerlink" href="#module-writing_schedule.sheet" title="Link to this heading"></a></h2>
+<p>Draw the printable time-block sheet with ReportLab (the default engine).</p>
+<p>This replaces the TeX dependency with a pure-Python one.  The sheet is a
+rectangular grid, so drawing lines and text at absolute coordinates is a
+natural fit: each planned block is a box that spans its exact time range,
+rather than snapping to the five-row-per-hour grid the LaTeX/tabular model
+forces.  The sub-rows survive only as light guide lines, which is the
+improvement the format spec recommends for a canvas renderer.</p>
+<p>Layout follows the spec’s geometry: a code key across the top, a Date row and
+two blank rows, hour labels down a narrow left column, planned blocks drawn as
+heavy outlined boxes in the first wide (plan) column, and the remaining plan
+columns left blank for revisions.  Each day is two pages, split at the same
+hour the reference uses; a block reaching a page edge is left open there.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.sheet.block_box">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.sheet.</span></span><span class="sig-name descname"><span class="pre">block_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_lo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_hi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_top</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_bottom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/writing_schedule/sheet.html#block_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.sheet.block_box" title="Link to this definition"></a></dt>
+<dd><p>Return the block’s box geometry on a page, or None if it is off-page.</p>
+<p>Pure geometry, factored out so tests can check that a block from t1 to t2
+maps to y positions proportional to its time range.  Returns a dict with
+<code class="docutils literal notranslate"><span class="pre">y_top</span></code>/<code class="docutils literal notranslate"><span class="pre">y_bottom</span></code> (points), the clipped <code class="docutils literal notranslate"><span class="pre">start</span></code>/<code class="docutils literal notranslate"><span class="pre">end</span></code> (hours), and
+<code class="docutils literal notranslate"><span class="pre">open_top</span></code>/<code class="docutils literal notranslate"><span class="pre">open_bottom</span></code> flags for blocks that run past a page edge.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.sheet.render_week_pdf">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.sheet.</span></span><span class="sig-name descname"><span class="pre">render_week_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parsed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.model.ParsedTable" title="writing_schedule.model.ParsedTable"><span class="pre">ParsedTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monday</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.config.Config" title="writing_schedule.config.Config"><span class="pre">Config</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/sheet.html#render_week_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.sheet.render_week_pdf" title="Link to this definition"></a></dt>
+<dd><p>Draw the whole week (two pages per day) into one PDF at <code class="docutils literal notranslate"><span class="pre">path</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.sheet.render_day_pdf">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.sheet.</span></span><span class="sig-name descname"><span class="pre">render_day_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parsed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.model.ParsedTable" title="writing_schedule.model.ParsedTable"><span class="pre">ParsedTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monday</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.config.Config" title="writing_schedule.config.Config"><span class="pre">Config</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/sheet.html#render_day_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.sheet.render_day_pdf" title="Link to this definition"></a></dt>
+<dd><p>Draw a single day (two pages) into a PDF at <code class="docutils literal notranslate"><span class="pre">path</span></code>.</p>
+</dd></dl>
+
+<p id="module-writing_schedule.sheet_common">Shared geometry for the printable time-block sheet.</p>
+<p>Both the ReportLab drawer and the LaTeX emitter use these helpers so the two
+engines agree on which days appear, in what order, and where each block sits.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.sheet_common.tidy">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.sheet_common.</span></span><span class="sig-name descname"><span class="pre">tidy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hhmm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/sheet_common.html#tidy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.sheet_common.tidy" title="Link to this definition"></a></dt>
+<dd><p>Drop a leading zero on the hour, so <code class="docutils literal notranslate"><span class="pre">04:00</span></code> becomes <code class="docutils literal notranslate"><span class="pre">4:00</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.sheet_common.page_split">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.sheet_common.</span></span><span class="sig-name descname"><span class="pre">page_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/writing_schedule/sheet_common.html#page_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.sheet_common.page_split" title="Link to this definition"></a></dt>
+<dd><p>Return the last hour of page one.</p>
+<p>Computed as <code class="docutils literal notranslate"><span class="pre">lo</span> <span class="pre">+</span> <span class="pre">ceil(total/2)</span> <span class="pre">-</span> <span class="pre">1</span></code> where <code class="docutils literal notranslate"><span class="pre">total</span> <span class="pre">=</span> <span class="pre">hi</span> <span class="pre">-</span> <span class="pre">lo</span> <span class="pre">+</span> <span class="pre">1</span></code>,
+matching the reference.  With the defaults (4..23) this gives 13.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.sheet_common.block_rows">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.sheet_common.</span></span><span class="sig-name descname"><span class="pre">block_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subrows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/writing_schedule/sheet_common.html#block_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.sheet_common.block_rows" title="Link to this definition"></a></dt>
+<dd><p>Return the (start_row, end_row) grid span for a block.</p>
+<p>Ports the reference’s row math.  A block occupies rows <code class="docutils literal notranslate"><span class="pre">start_row</span></code> up to
+but not including <code class="docutils literal notranslate"><span class="pre">end_row</span></code>; the guard keeps a sub-row-short block at one
+row.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.sheet_common.block_hours">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.sheet_common.</span></span><span class="sig-name descname"><span class="pre">block_hours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/writing_schedule/sheet_common.html#block_hours"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.sheet_common.block_hours" title="Link to this definition"></a></dt>
+<dd><p>Return (start, end) as fractional hours for exact canvas placement.</p>
+<p>An end at or before the start is treated as crossing midnight and extends
+to 24:00, so an overnight block reads as one open-ended box.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.sheet_common.iter_days">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.sheet_common.</span></span><span class="sig-name descname"><span class="pre">iter_days</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parsed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.model.ParsedTable" title="writing_schedule.model.ParsedTable"><span class="pre">ParsedTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monday</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">date</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#writing_schedule.model.Event" title="writing_schedule.model.Event"><span class="pre">Event</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/writing_schedule/sheet_common.html#iter_days"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.sheet_common.iter_days" title="Link to this definition"></a></dt>
+<dd><p>Return (date, “ISO (Weekday)”, events) for each day column, in order.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.sheet_common.key_pairs">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.sheet_common.</span></span><span class="sig-name descname"><span class="pre">key_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parsed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.model.ParsedTable" title="writing_schedule.model.ParsedTable"><span class="pre">ParsedTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.config.Config" title="writing_schedule.config.Config"><span class="pre">Config</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/writing_schedule/sheet_common.html#key_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.sheet_common.key_pairs" title="Link to this definition"></a></dt>
+<dd><p>Return (code, description) for the sheet key, using the merged legend.</p>
+</dd></dl>
+
+<p id="module-writing_schedule.sheet_latex">LaTeX time-block sheet emitter.</p>
+<p>A faithful port of the <code class="docutils literal notranslate"><span class="pre">writing-schedule--timeblock-*</span></code> LaTeX family, kept as
+an optional engine (<code class="docutils literal notranslate"><span class="pre">--engine</span> <span class="pre">latex</span></code>) for users who have TeX installed and
+want output that is byte-comparable with the Emacs version.  The default
+engine is ReportLab (<a class="reference internal" href="#module-writing_schedule.sheet" title="writing_schedule.sheet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">writing_schedule.sheet</span></code></a>).</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.sheet_latex.latex_escape">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.sheet_latex.</span></span><span class="sig-name descname"><span class="pre">latex_escape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/sheet_latex.html#latex_escape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.sheet_latex.latex_escape" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.sheet_latex.render_latex">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.sheet_latex.</span></span><span class="sig-name descname"><span class="pre">render_latex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parsed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.model.ParsedTable" title="writing_schedule.model.ParsedTable"><span class="pre">ParsedTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monday</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.config.Config" title="writing_schedule.config.Config"><span class="pre">Config</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/sheet_latex.html#render_latex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.sheet_latex.render_latex" title="Link to this definition"></a></dt>
+<dd><p>Return a full LaTeX document with a two-page sheet per day.</p>
+</dd></dl>
+
+<p id="module-writing_schedule.sheet_org">Write the editable week org file, one booktabs table per day.</p>
+<p>Ports <code class="docutils literal notranslate"><span class="pre">writing-schedule--timeblock-org-document</span></code>.  See the format spec,
+“The editable week export”.  Days appear in day-column order and blocks within
+a day are sorted by start time; the Revision column is always empty.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.sheet_org.build_week_org">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.sheet_org.</span></span><span class="sig-name descname"><span class="pre">build_week_org</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parsed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.model.ParsedTable" title="writing_schedule.model.ParsedTable"><span class="pre">ParsedTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monday</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#writing_schedule.config.Config" title="writing_schedule.config.Config"><span class="pre">Config</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/sheet_org.html#build_week_org"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.sheet_org.build_week_org" title="Link to this definition"></a></dt>
+<dd><p>Return the editable week org document as a string.</p>
+</dd></dl>
+
+</section>
+<section id="module-writing_schedule.config">
+<span id="configuration-and-utilities"></span><h2>Configuration and utilities<a class="headerlink" href="#module-writing_schedule.config" title="Link to this heading"></a></h2>
+<p>Configuration defaults for the writing-schedule Python port.</p>
+<p>Each field mirrors a <code class="docutils literal notranslate"><span class="pre">defcustom</span></code> in <code class="docutils literal notranslate"><span class="pre">writing-schedule.el</span></code>.  Grouping them
+in one dataclass keeps the generators pure: they take a <a class="reference internal" href="#writing_schedule.config.Config" title="writing_schedule.config.Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></a> rather
+than reading globals, which makes them easy to test.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="writing_schedule.config.Config">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">writing_schedule.config.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_todo:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">todo_keyword:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'TODO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'America/Chicago'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prodid:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'-//Blaine</span> <span class="pre">Mooers//writing-schedule.py//EN'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeblock_start_hour:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeblock_end_hour:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">23</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeblock_columns:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeblock_subrows:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code_descriptions:</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/writing_schedule/config.html#Config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.config.Config" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Runtime configuration for schedule, calendar, and sheet generation.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.config.Config.use_todo">
+<span class="sig-name descname"><span class="pre">use_todo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#writing_schedule.config.Config.use_todo" title="Link to this definition"></a></dt>
+<dd><p>When True, each generated event headline carries the TODO keyword.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.config.Config.todo_keyword">
+<span class="sig-name descname"><span class="pre">todo_keyword</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TODO'</span></em><a class="headerlink" href="#writing_schedule.config.Config.todo_keyword" title="Link to this definition"></a></dt>
+<dd><p>The keyword placed before each event when <code class="docutils literal notranslate"><span class="pre">use_todo</span></code> is True.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.config.Config.timezone">
+<span class="sig-name descname"><span class="pre">timezone</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'America/Chicago'</span></em><a class="headerlink" href="#writing_schedule.config.Config.timezone" title="Link to this definition"></a></dt>
+<dd><p>IANA time zone used for the calendar.  An empty string selects the
+floating-time behaviour of the reference implementation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.config.Config.prodid">
+<span class="sig-name descname"><span class="pre">prodid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'-//Blaine</span> <span class="pre">Mooers//writing-schedule.py//EN'</span></em><a class="headerlink" href="#writing_schedule.config.Config.prodid" title="Link to this definition"></a></dt>
+<dd><p>PRODID advertised by the exporter.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.config.Config.timeblock_start_hour">
+<span class="sig-name descname"><span class="pre">timeblock_start_hour</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#writing_schedule.config.Config.timeblock_start_hour" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.config.Config.timeblock_end_hour">
+<span class="sig-name descname"><span class="pre">timeblock_end_hour</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#writing_schedule.config.Config.timeblock_end_hour" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.config.Config.timeblock_columns">
+<span class="sig-name descname"><span class="pre">timeblock_columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#writing_schedule.config.Config.timeblock_columns" title="Link to this definition"></a></dt>
+<dd><p>One planned column plus (columns - 1) revision columns.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.config.Config.timeblock_subrows">
+<span class="sig-name descname"><span class="pre">timeblock_subrows</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#writing_schedule.config.Config.timeblock_subrows" title="Link to this definition"></a></dt>
+<dd><p>Writing rows per hour.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="writing_schedule.config.Config.code_descriptions">
+<span class="sig-name descname"><span class="pre">code_descriptions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#writing_schedule.config.Config.code_descriptions" title="Link to this definition"></a></dt>
+<dd><p>Standing dictionary of code -&gt; description, merged <em>under</em> a table’s
+own legend (the legend wins).  Used by the sheets, not the schedule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="writing_schedule.config.Config.effective_legend">
+<span class="sig-name descname"><span class="pre">effective_legend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/writing_schedule/config.html#Config.effective_legend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.config.Config.effective_legend" title="Link to this definition"></a></dt>
+<dd><p>Merge <code class="docutils literal notranslate"><span class="pre">code_descriptions</span></code> under <code class="docutils literal notranslate"><span class="pre">legend</span></code>.</p>
+<p>Entries in <code class="docutils literal notranslate"><span class="pre">legend</span></code> take precedence because they are specific to the
+week; the configured descriptions fill in any code the legend omits.
+Mirrors <code class="docutils literal notranslate"><span class="pre">writing-schedule--effective-legend</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p id="module-writing_schedule.template">Blank weekly-table scaffold.</p>
+<p>Ports <code class="docutils literal notranslate"><span class="pre">writing-schedule--template-string</span></code>.  The scaffold uses single-letter
+codes; a user may rename the legend rows and use their own short uppercase
+codes (such as EM or EX) in the cells.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.template.template_string">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.template.</span></span><span class="sig-name descname"><span class="pre">template_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/writing_schedule/template.html#template_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.template.template_string" title="Link to this definition"></a></dt>
+<dd><p>Return a blank weekly schedule template for <code class="docutils literal notranslate"><span class="pre">n</span></code> projects (1..26).</p>
+</dd></dl>
+
+<p id="module-writing_schedule.archive">List archived weekly schedule files, newest first.</p>
+<p>Ports <code class="docutils literal notranslate"><span class="pre">writing-schedule--archived-weeks</span></code>.  ISO dates sort lexically, so a
+plain descending string sort orders the weeks from most to least recent.
+Only <code class="docutils literal notranslate"><span class="pre">writing-YYYY-MM-DD.org</span></code> names are matched, so calendar exports and
+unrelated org files are ignored.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.archive.archived_weeks">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.archive.</span></span><span class="sig-name descname"><span class="pre">archived_weeks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/writing_schedule/archive.html#archived_weeks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.archive.archived_weeks" title="Link to this definition"></a></dt>
+<dd><p>Return (ISO-date, path) for each archived week, newest first.</p>
+</dd></dl>
+
+</section>
+<section id="module-writing_schedule.cli">
+<span id="command-line"></span><h2>Command line<a class="headerlink" href="#module-writing_schedule.cli" title="Link to this heading"></a></h2>
+<p>Command-line front end.</p>
+<p>Subcommands mirror the shell script and the elisp entry points:</p>
+<blockquote>
+<div><p>generate   parse a table and write the dated schedule .org (and .ics)
+export     parse a table and write only the .ics
+sheets     draw the printable time-block sheet (ReportLab or LaTeX) and/or org
+template   print or write a blank weekly table for N projects
+weeks      list archived weekly schedule files, newest first</p>
+</div></blockquote>
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.cli.build_parser">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.cli.</span></span><span class="sig-name descname"><span class="pre">build_parser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ArgumentParser</span></span></span><a class="reference internal" href="_modules/writing_schedule/cli.html#build_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.cli.build_parser" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="writing_schedule.cli.main">
+<span class="sig-prename descclassname"><span class="pre">writing_schedule.cli.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/writing_schedule/cli.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#writing_schedule.cli.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="daylight-saving.html" class="btn btn-neutral float-left" title="Daylight saving and time zones" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="development.html" class="btn btn-neutral float-right" title="Development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Blaine Mooers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

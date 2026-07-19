@@ -1,0 +1,270 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>writing_schedule.schedule &mdash; writing-schedule 0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            writing-schedule
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial: build a schedule from an org table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../org-format.html">The org table format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../library.html">Using the library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../daylight-saving.html">Daylight saving and time zones</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">writing-schedule</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">writing_schedule.schedule</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for writing_schedule.schedule</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Generate the dated schedule ``.org`` file and its Summary section.</span>
+
+<span class="sd">Ports ``writing-schedule--build-org`` and ``writing-schedule--summary`` plus</span>
+<span class="sd">the batch mapping helper.  See the format spec, &quot;The generated schedule file&quot;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_dt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.week</span><span class="w"> </span><span class="kn">import</span> <span class="n">iso_date</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">week_monday</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Event</span><span class="p">,</span> <span class="n">MapEntry</span><span class="p">,</span> <span class="n">ParsedTable</span><span class="p">,</span> <span class="n">map_get</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">minutes_between</span>
+
+
+<div class="viewcode-block" id="legend_mapping">
+<a class="viewcode-back" href="../../api.html#writing_schedule.schedule.legend_mapping">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">legend_mapping</span><span class="p">(</span>
+    <span class="n">letters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">legend</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">MapEntry</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a non-interactive mapping for ``letters`` from ``legend``.</span>
+
+<span class="sd">    Each entry has an empty code and a description taken from the legend, so</span>
+<span class="sd">    batch generation needs no prompts.  Mirrors</span>
+<span class="sd">    ``writing-schedule--legend-mapping``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lookup</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">legend</span><span class="p">)</span>  <span class="c1"># last wins here; the reference&#39;s assoc takes first.</span>
+    <span class="c1"># Preserve first-appearance description to match elisp ``assoc``.</span>
+    <span class="n">first</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">desc</span> <span class="ow">in</span> <span class="n">legend</span><span class="p">:</span>
+        <span class="n">first</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">MapEntry</span><span class="p">(</span><span class="n">letter</span><span class="o">=</span><span class="n">ltr</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="n">first</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ltr</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">ltr</span> <span class="ow">in</span> <span class="n">letters</span><span class="p">]</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_headline</span><span class="p">(</span><span class="n">entry</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">MapEntry</span><span class="p">],</span> <span class="n">letter</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Choose headline text: description, then code, then ``Project X``.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">entry</span> <span class="ow">and</span> <span class="n">entry</span><span class="o">.</span><span class="n">desc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">entry</span><span class="o">.</span><span class="n">desc</span>
+    <span class="k">if</span> <span class="n">entry</span> <span class="ow">and</span> <span class="n">entry</span><span class="o">.</span><span class="n">code</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">entry</span><span class="o">.</span><span class="n">code</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Project </span><span class="si">{</span><span class="n">letter</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<div class="viewcode-block" id="build_org">
+<a class="viewcode-back" href="../../api.html#writing_schedule.schedule.build_org">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_org</span><span class="p">(</span>
+    <span class="n">events</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Event</span><span class="p">],</span>
+    <span class="n">mapping</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">MapEntry</span><span class="p">],</span>
+    <span class="n">monday</span><span class="p">:</span> <span class="n">_dt</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Config</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the schedule org file body (without the Summary section).&quot;&quot;&quot;</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">config</span> <span class="ow">or</span> <span class="n">Config</span><span class="p">()</span>
+    <span class="n">out</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Sections in first-appearance order among the events.</span>
+    <span class="n">sections</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">section</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">:</span>
+            <span class="n">sections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">section</span><span class="p">)</span>
+
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;#+TITLE: </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;#+FILETAGS: :writing:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;#+LaTeX_HEADER: </span><span class="se">\\</span><span class="s2">usepackage[margin=0.5in]</span><span class="si">{geometry}</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;# Letter to project map:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mapping</span><span class="p">:</span>
+        <span class="n">tail</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">desc</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">desc</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;#   </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">letter</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">code</span><span class="si">}{</span><span class="n">tail</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;* </span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  :PROPERTIES:</span><span class="se">\n</span><span class="s2">  :CATEGORY: </span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="se">\n</span><span class="s2">  :END:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">section</span> <span class="o">!=</span> <span class="n">s</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">entry</span> <span class="o">=</span> <span class="n">map_get</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">letter</span><span class="p">)</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">code</span> <span class="k">if</span> <span class="n">entry</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">head</span> <span class="o">=</span> <span class="n">_headline</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">letter</span><span class="p">)</span>
+            <span class="n">todo</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">todo_keyword</span><span class="si">}</span><span class="s2"> &quot;</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">use_todo</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;** </span><span class="si">{</span><span class="n">todo</span><span class="si">}{</span><span class="n">head</span><span class="si">}</span><span class="s2"> :</span><span class="si">{</span><span class="n">ev</span><span class="o">.</span><span class="n">letter</span><span class="si">}</span><span class="s2">:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">code</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   :PROPERTIES:</span><span class="se">\n</span><span class="s2">   :WS_CODE: </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="se">\n</span><span class="s2">   :END:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="n">timestamp</span><span class="p">(</span><span class="n">monday</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   </span><span class="si">{</span><span class="n">ts</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="summary">
+<a class="viewcode-back" href="../../api.html#writing_schedule.schedule.summary">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">summary</span><span class="p">(</span><span class="n">events</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Event</span><span class="p">],</span> <span class="n">mapping</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">MapEntry</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an org Summary section totalling weekly hours per code.</span>
+
+<span class="sd">    The section carries no timestamp, so a calendar exporter skips it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">totals</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">order</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">letter</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+            <span class="n">order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">letter</span><span class="p">)</span>
+        <span class="n">totals</span><span class="p">[</span><span class="n">ev</span><span class="o">.</span><span class="n">letter</span><span class="p">]</span> <span class="o">=</span> <span class="n">totals</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">letter</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">minutes_between</span><span class="p">(</span>
+            <span class="n">ev</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">end</span>
+        <span class="p">)</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ltr</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="n">map_get</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">ltr</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">_headline</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">ltr</span><span class="p">)</span>
+        <span class="n">hours</span> <span class="o">=</span> <span class="n">totals</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ltr</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">60.0</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">ltr</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">hours</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> h (</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">* Summary</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="schedule_title">
+<a class="viewcode-back" href="../../api.html#writing_schedule.schedule.schedule_title">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">schedule_title</span><span class="p">(</span><span class="n">monday</span><span class="p">:</span> <span class="n">_dt</span><span class="o">.</span><span class="n">date</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The default schedule title, e.g. ``Writing Schedule (week of ...)``.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Writing Schedule (week of </span><span class="si">{</span><span class="n">iso_date</span><span class="p">(</span><span class="n">monday</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="generate_schedule">
+<a class="viewcode-back" href="../../api.html#writing_schedule.schedule.generate_schedule">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_schedule</span><span class="p">(</span>
+    <span class="n">parsed</span><span class="p">:</span> <span class="n">ParsedTable</span><span class="p">,</span>
+    <span class="n">week</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Config</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_dt</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ``(monday, title, body)`` for the schedule file.</span>
+
+<span class="sd">    ``week`` is any date (or ISO string) inside the target week; it snaps to</span>
+<span class="sd">    the Monday.  ``body`` is the full file text including the Summary section.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">config</span> <span class="ow">or</span> <span class="n">Config</span><span class="p">()</span>
+    <span class="n">monday</span> <span class="o">=</span> <span class="n">week_monday</span><span class="p">(</span><span class="n">week</span><span class="p">)</span>
+    <span class="n">ttl</span> <span class="o">=</span> <span class="n">title</span> <span class="ow">or</span> <span class="n">schedule_title</span><span class="p">(</span><span class="n">monday</span><span class="p">)</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="n">legend_mapping</span><span class="p">(</span><span class="n">parsed</span><span class="o">.</span><span class="n">letters</span><span class="p">,</span> <span class="n">parsed</span><span class="o">.</span><span class="n">legend</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">build_org</span><span class="p">(</span><span class="n">parsed</span><span class="o">.</span><span class="n">events</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">monday</span><span class="p">,</span> <span class="n">ttl</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span> <span class="o">+</span> <span class="n">summary</span><span class="p">(</span>
+        <span class="n">parsed</span><span class="o">.</span><span class="n">events</span><span class="p">,</span> <span class="n">mapping</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">monday</span><span class="p">,</span> <span class="n">ttl</span><span class="p">,</span> <span class="n">body</span></div>
+
+
+
+<div class="viewcode-block" id="schedule_filename">
+<a class="viewcode-back" href="../../api.html#writing_schedule.schedule.schedule_filename">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">schedule_filename</span><span class="p">(</span><span class="n">monday</span><span class="p">:</span> <span class="n">_dt</span><span class="o">.</span><span class="n">date</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the archival file name for the week beginning ``monday``.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;writing-</span><span class="si">{</span><span class="n">iso_date</span><span class="p">(</span><span class="n">monday</span><span class="p">)</span><span class="si">}</span><span class="s2">.org&quot;</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Blaine Mooers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

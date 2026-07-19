@@ -1,0 +1,203 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Using the library &mdash; writing-schedule 0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Daylight saving and time zones" href="daylight-saving.html" />
+    <link rel="prev" title="Command-line reference" href="cli.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            writing-schedule
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial: build a schedule from an org table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="org-format.html">The org table format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using the library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#parse-a-table">Parse a table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#write-the-schedule-and-the-calendar">Write the schedule and the calendar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#draw-the-sheet-and-the-editable-week">Draw the sheet and the editable week</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configure-behavior">Configure behavior</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scaffold-a-blank-table">Scaffold a blank table</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="daylight-saving.html">Daylight saving and time zones</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">writing-schedule</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Using the library</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/library.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="using-the-library">
+<h1>Using the library<a class="headerlink" href="#using-the-library" title="Link to this heading"></a></h1>
+<p>The package exposes a small public API, so you can parse a table and build the
+outputs from your own Python without the command line. The functions and
+classes below are re-exported from the top-level <code class="docutils literal notranslate"><span class="pre">writing_schedule</span></code> package,
+and the full signatures are in the <a class="reference internal" href="api.html"><span class="std std-doc">API reference</span></a>.</p>
+<section id="parse-a-table">
+<h2>Parse a table<a class="headerlink" href="#parse-a-table" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">writing_schedule</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_text</span>
+
+<span class="n">parsed</span> <span class="o">=</span> <span class="n">parse_text</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;examples/my-week.org&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parsed</span><span class="o">.</span><span class="n">events</span><span class="p">),</span> <span class="s2">&quot;events&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">parsed</span><span class="o">.</span><span class="n">letters</span><span class="p">)</span>          <span class="c1"># sorted, de-duplicated codes</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">parsed</span><span class="o">.</span><span class="n">legend_lookup</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">parse_text</span></code> returns a <a class="reference internal" href="api.html#writing_schedule.model.ParsedTable" title="writing_schedule.model.ParsedTable"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParsedTable</span></code></a>, which holds
+the events, the legend, the codes, and the day columns. The parser knows
+nothing about output formats, so the same structure feeds every writer.</p>
+</section>
+<section id="write-the-schedule-and-the-calendar">
+<h2>Write the schedule and the calendar<a class="headerlink" href="#write-the-schedule-and-the-calendar" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">writing_schedule</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_text</span><span class="p">,</span> <span class="n">generate_schedule</span><span class="p">,</span> <span class="n">build_ics</span>
+
+<span class="n">parsed</span> <span class="o">=</span> <span class="n">parse_text</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;examples/my-week.org&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<span class="n">monday</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">generate_schedule</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="s2">&quot;2026-01-19&quot;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;writing-2026-01-19.org&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+    <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;writing-2026-01-19.ics&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+    <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">build_ics</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="n">monday</span><span class="p">,</span> <span class="n">title</span><span class="p">))</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">generate_schedule</span></code> snaps the date to the Monday and returns that Monday, the
+title, and the full file body, including the Summary section. <code class="docutils literal notranslate"><span class="pre">build_ics</span></code>
+writes the calendar directly, with a <code class="docutils literal notranslate"><span class="pre">TZID</span></code> and a <code class="docutils literal notranslate"><span class="pre">VTIMEZONE</span></code>, so the times are
+unambiguous across a daylight-saving transition.</p>
+</section>
+<section id="draw-the-sheet-and-the-editable-week">
+<h2>Draw the sheet and the editable week<a class="headerlink" href="#draw-the-sheet-and-the-editable-week" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">writing_schedule</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_text</span><span class="p">,</span> <span class="n">render_week_pdf</span><span class="p">,</span> <span class="n">build_week_org</span><span class="p">,</span> <span class="n">week_monday</span>
+
+<span class="n">parsed</span> <span class="o">=</span> <span class="n">parse_text</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;examples/my-week.org&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<span class="n">monday</span> <span class="o">=</span> <span class="n">week_monday</span><span class="p">(</span><span class="s2">&quot;2026-01-19&quot;</span><span class="p">)</span>
+
+<span class="n">render_week_pdf</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="n">monday</span><span class="p">,</span> <span class="s2">&quot;sheets-week-2026-01-19.pdf&quot;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;sheets-week-2026-01-19.org&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+    <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">build_week_org</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="n">monday</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="configure-behavior">
+<h2>Configure behavior<a class="headerlink" href="#configure-behavior" title="Link to this heading"></a></h2>
+<p>Pass a <a class="reference internal" href="api.html#writing_schedule.config.Config" title="writing_schedule.config.Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></a> to change the time zone, turn
+the <code class="docutils literal notranslate"><span class="pre">TODO</span></code> keyword off, adjust the sheet geometry, or supply a standing
+dictionary of code descriptions.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">writing_schedule</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">parse_text</span><span class="p">,</span> <span class="n">build_ics</span><span class="p">,</span> <span class="n">generate_schedule</span>
+
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span>
+    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+    <span class="n">use_todo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">code_descriptions</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;CM&quot;</span><span class="p">:</span> <span class="s2">&quot;commute in morning&quot;</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">parsed</span> <span class="o">=</span> <span class="n">parse_text</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;examples/my-week.org&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<span class="n">monday</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">generate_schedule</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="s2">&quot;2026-01-19&quot;</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+<span class="n">ics</span> <span class="o">=</span> <span class="n">build_ics</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="n">monday</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="scaffold-a-blank-table">
+<h2>Scaffold a blank table<a class="headerlink" href="#scaffold-a-blank-table" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">writing_schedule</span><span class="w"> </span><span class="kn">import</span> <span class="n">template_string</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">template_string</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>   <span class="c1"># a blank table for five projects</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cli.html" class="btn btn-neutral float-left" title="Command-line reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="daylight-saving.html" class="btn btn-neutral float-right" title="Daylight saving and time zones" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Blaine Mooers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
