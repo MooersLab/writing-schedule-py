@@ -73,7 +73,11 @@ example below, which is `examples/my-week.org` in the repository.
 | EM: email            |  |  |  |  |  |
 ```
 
-### Step 2, understand the four kinds of row
+Note that the table can have rows with overlapping time ranges.
+These will be ignored unless they have a code in a day column.
+Rows that are blank will also be ignored.
+
+### Step 2, understand the four kinds of rows
 
 The parser reads the table by testing the first cell of each row, and
 horizontal rules are ignored. Four kinds of row carry meaning.
