@@ -19,12 +19,16 @@ from typing import List, Optional
 from .config import Config
 from .ics import build_ics
 from .parser import parse_text
-from .schedule import generate_schedule, schedule_filename
+from .schedule import (
+    generate_day_schedule,
+    generate_schedule,
+    schedule_filename,
+)
 from .sheet import render_day_pdf, render_week_pdf
 from .sheet_latex import render_latex
 from .sheet_org import build_week_org
 from .template import template_string
-from .week import iso_date, week_monday
+from .week import iso_date, resolve_date, week_monday
 
 
 def _read(path: str) -> str:
@@ -43,20 +47,33 @@ def _config_from_args(args) -> Config:
 
 def _cmd_generate(args) -> int:
     cfg = _config_from_args(args)
+    if not args.week and not args.day:
+        print("Give --week for the whole week, or --day for one day",
+              file=sys.stderr)
+        return 2
     parsed = parse_text(_read(args.table))
     if not parsed.events:
         print("No filled time blocks found in the table", file=sys.stderr)
         return 2
-    monday, title, body = generate_schedule(parsed, args.week, cfg)
+    if args.day:
+        day = resolve_date(args.day)
+        monday, title, body, ics_parsed = generate_day_schedule(parsed, day, cfg)
+        if not ics_parsed.events:
+            print(f"No filled time blocks for {iso_date(day)}", file=sys.stderr)
+            return 2
+        base = f"day-{iso_date(day)}"
+    else:
+        monday, title, body = generate_schedule(parsed, args.week, cfg)
+        ics_parsed = parsed
+        base = os.path.splitext(schedule_filename(monday))[0]
     os.makedirs(args.dir, exist_ok=True)
-    org_path = os.path.join(args.dir, schedule_filename(monday))
+    org_path = os.path.join(args.dir, base + ".org")
     with open(org_path, "w", encoding="utf-8") as fh:
         fh.write(body)
     print(f"Wrote schedule:  {org_path}")
     if not args.no_ics:
-        base = os.path.splitext(os.path.basename(org_path))[0]
         ics_path = os.path.join(args.dir, base + ".ics")
-        ics = build_ics(parsed, monday, title, cfg, calname=base)
+        ics = build_ics(ics_parsed, monday, title, cfg, calname=base)
         with open(ics_path, "w", encoding="utf-8", newline="") as fh:
             fh.write(ics)
         print(f"Wrote iCalendar: {ics_path}")
@@ -65,16 +82,29 @@ def _cmd_generate(args) -> int:
 
 def _cmd_export(args) -> int:
     cfg = _config_from_args(args)
+    if not args.week and not args.day:
+        print("Give --week for the whole week, or --day for one day",
+              file=sys.stderr)
+        return 2
     parsed = parse_text(_read(args.table))
     if not parsed.events:
         print("No filled time blocks found in the table", file=sys.stderr)
         return 2
-    monday = week_monday(args.week)
-    _, title, _ = generate_schedule(parsed, args.week, cfg)
-    base = os.path.splitext(schedule_filename(monday))[0]
+    if args.day:
+        day = resolve_date(args.day)
+        monday, title, _body, ics_parsed = generate_day_schedule(parsed, day, cfg)
+        if not ics_parsed.events:
+            print(f"No filled time blocks for {iso_date(day)}", file=sys.stderr)
+            return 2
+        base = f"day-{iso_date(day)}"
+    else:
+        monday = week_monday(args.week)
+        _, title, _ = generate_schedule(parsed, args.week, cfg)
+        ics_parsed = parsed
+        base = os.path.splitext(schedule_filename(monday))[0]
     os.makedirs(args.dir, exist_ok=True)
     ics_path = os.path.join(args.dir, base + ".ics")
-    ics = build_ics(parsed, monday, title, cfg, calname=base)
+    ics = build_ics(ics_parsed, monday, title, cfg, calname=base)
     with open(ics_path, "w", encoding="utf-8", newline="") as fh:
         fh.write(ics)
     print(f"Wrote iCalendar: {ics_path}")
@@ -83,18 +113,30 @@ def _cmd_export(args) -> int:
 
 def _cmd_sheets(args) -> int:
     cfg = _config_from_args(args)
+    if not args.week and not args.day:
+        print("Give --week for the whole week, or --day for one day",
+              file=sys.stderr)
+        return 2
     parsed = parse_text(_read(args.table))
-    monday = week_monday(args.week)
+
+    # A named day fixes both the day and its week; otherwise the week is used.
+    day = resolve_date(args.day) if args.day else None
+    monday = week_monday(day) if day is not None else week_monday(args.week)
     stamp = iso_date(monday)
     os.makedirs(args.dir, exist_ok=True)
     written: List[str] = []
 
     if args.format in ("pdf", "both"):
         if args.engine == "latex":
-            tex_path = os.path.join(args.dir, f"sheets-week-{stamp}.tex")
+            name = f"sheet-{iso_date(day)}" if day else f"sheets-week-{stamp}"
+            tex_path = os.path.join(args.dir, f"{name}.tex")
             with open(tex_path, "w", encoding="utf-8") as fh:
-                fh.write(render_latex(parsed, monday, cfg))
+                fh.write(render_latex(parsed, monday, cfg, day=day))
             written.append(tex_path)
+        elif day is not None:
+            p = os.path.join(args.dir, f"sheet-{iso_date(day)}.pdf")
+            render_day_pdf(parsed, monday, day, p, cfg)
+            written.append(p)
         elif args.per_day:
             for d, _ds, _evs in _iter_days(parsed, monday):
                 p = os.path.join(args.dir, f"sheet-{iso_date(d)}.pdf")
@@ -106,9 +148,10 @@ def _cmd_sheets(args) -> int:
             written.append(p)
 
     if args.format in ("org", "both"):
-        org_path = os.path.join(args.dir, f"sheets-week-{stamp}.org")
+        name = f"sheet-{iso_date(day)}" if day else f"sheets-week-{stamp}"
+        org_path = os.path.join(args.dir, f"{name}.org")
         with open(org_path, "w", encoding="utf-8") as fh:
-            fh.write(build_week_org(parsed, monday, cfg))
+            fh.write(build_week_org(parsed, monday, cfg, day=day))
         written.append(org_path)
 
     for p in written:
@@ -152,16 +195,24 @@ def build_parser() -> argparse.ArgumentParser:
 
     g = sub.add_parser("generate", help="write the dated schedule .org (and .ics)")
     g.add_argument("table", help="path to the org table file")
-    g.add_argument("--week", required=True, help="any date (YYYY-MM-DD) in the target week")
+    g.add_argument("--week", help="any date (YYYY-MM-DD) in the target week")
+    g.add_argument(
+        "--day",
+        help="a single day as YYYY-MM-DD or 'today'; writes day-<ISO>.org (and .ics)",
+    )
     g.add_argument("--dir", default=".", help="output directory")
     g.add_argument("--no-ics", action="store_true", help="skip the .ics file")
     g.add_argument("--no-todo", action="store_true", help="omit the TODO keyword")
     g.add_argument("--tz", help="IANA time zone (empty string for floating times)")
     g.set_defaults(func=_cmd_generate)
 
-    e = sub.add_parser("export", help="write only the .ics for a table and week")
+    e = sub.add_parser("export", help="write only the .ics for a table and week or day")
     e.add_argument("table")
-    e.add_argument("--week", required=True, help="any date in the target week")
+    e.add_argument("--week", help="any date in the target week")
+    e.add_argument(
+        "--day",
+        help="a single day as YYYY-MM-DD or 'today'; writes day-<ISO>.ics",
+    )
     e.add_argument("--dir", default=".", help="output directory")
     e.add_argument("--no-todo", action="store_true")
     e.add_argument("--tz", help="IANA time zone")
@@ -169,7 +220,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("sheets", help="draw printable time-block sheets")
     s.add_argument("table")
-    s.add_argument("--week", required=True, help="any date in the target week")
+    s.add_argument("--week", help="any date in the target week (whole week)")
+    s.add_argument(
+        "--day",
+        help="a single day as YYYY-MM-DD or 'today'; prints only that day's sheet",
+    )
     s.add_argument("--dir", default=".", help="output directory")
     s.add_argument("--engine", choices=["reportlab", "latex"], default="reportlab")
     s.add_argument("--format", choices=["pdf", "org", "both"], default="pdf")

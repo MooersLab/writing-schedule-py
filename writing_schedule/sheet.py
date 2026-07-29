@@ -220,17 +220,14 @@ def render_week_pdf(parsed: ParsedTable, monday: _dt.date, path: str,
 
 def render_day_pdf(parsed: ParsedTable, monday: _dt.date, day_date: _dt.date,
                    path: str, config: Optional[Config] = None) -> str:
-    """Draw a single day (two pages) into a PDF at ``path``."""
+    """Draw a single day (two pages) into a PDF at ``path``.
+
+    A day with no column in the table draws as a blank sheet, so any date,
+    including today, produces a usable plan to fill in by hand.
+    """
     cfg = config or Config()
     key_text = _key_text(key_pairs(parsed, cfg))
-    date_str = None
-    events: List[Event] = []
-    for d, ds, evs in iter_days(parsed, monday):
-        if d == day_date:
-            date_str, events = ds, evs
-            break
-    if date_str is None:
-        date_str = day_date.isoformat()
+    _d, date_str, events = iter_days(parsed, monday, only=day_date)[0]
     c = canvas.Canvas(path, pagesize=_PAGE)
     c.setTitle(f"Time-block sheet, {day_date.isoformat()}")
     _draw_day(c, date_str, key_text, events, cfg)

@@ -61,9 +61,22 @@ def block_hours(start: str, end: str) -> Tuple[float, float]:
 
 
 def iter_days(
-    parsed: ParsedTable, monday: _dt.date
+    parsed: ParsedTable,
+    monday: _dt.date,
+    only: Optional[_dt.date] = None,
 ) -> List[Tuple[_dt.date, str, List[Event]]]:
-    """Return (date, "ISO (Weekday)", events) for each day column, in order."""
+    """Return (date, "ISO (Weekday)", events) for each day column, in order.
+
+    When ``only`` is a date, return just that one day, even when the table has
+    no column for it, in which case the day carries no events and reads as a
+    blank sheet.  This is what the day-scoped commands use to print the plan
+    for a single day, which may be today.
+    """
+    if only is not None:
+        off = (only - monday).days
+        events = [e for e in parsed.events if e.offset == off]
+        date_str = f"{iso_date(only)} ({DAY_FULL[only.weekday()]})"
+        return [(only, date_str, events)]
     offsets = sorted({off for _, off in parsed.columns})
     out = []
     for off in offsets:

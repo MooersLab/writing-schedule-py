@@ -71,6 +71,21 @@ and the remaining columns are blank, so each time the day changes you write a
 new plan in the next column. The rightmost filled column therefore records
 what actually happened, which is a record you can transcribe later.
 
+When a day turns out differently from the plan, edit that day's cells in the
+weekly table and redo just that day with `--day`, which takes a date or the
+word `today`. Both `sheets` and `generate` accept it:
+
+```
+writing-schedule sheets   examples/my-week.org --day 2026-01-21 --dir out --format both
+writing-schedule sheets   examples/my-week.org --day today       --dir out
+writing-schedule generate examples/my-week.org --day 2026-01-21 --dir out
+```
+
+The `sheets` command writes `sheet-<ISO>.pdf`, and `sheet-<ISO>.org` with
+`--format both`. The `generate` command writes `day-<ISO>.org` and
+`day-<ISO>.ics` for that day alone, and the `day-` prefix keeps it out of the
+weekly archive, so there is no need to redo the whole week to refresh one day.
+
 To rework a saved week, list the archive and open the file you want:
 
 ```

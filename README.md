@@ -133,25 +133,48 @@ sections, and the two commands write these files into `out/`.
 To rework a saved week later, `writing-schedule weeks --dir out` lists the
 archived schedule files newest first.
 
+### Step 4, redo one day when the plan changes
+
+Events crop up, so a day rarely runs as first drawn. Edit that day's cells in
+the weekly table, then redo just that day with `--day`, which takes a date or
+the word `today`. Both `sheets` and `generate` accept it.
+
+```
+writing-schedule sheets   examples/my-week.org --day 2026-01-21 --dir out --format both
+writing-schedule sheets   examples/my-week.org --day today       --dir out
+writing-schedule generate examples/my-week.org --day 2026-01-21 --dir out
+```
+
+The `sheets` command writes `sheet-<ISO>.pdf` and, with `--format both`,
+`sheet-<ISO>.org`. The `generate` command writes `day-<ISO>.org` and
+`day-<ISO>.ics`, holding that day's events alone. The `day-` prefix keeps
+these out of the weekly archive, so a redone day never overwrites the week.
+The day sets its own week, so `--week` is not needed with `--day`. A day the
+table has no column for prints as a blank sheet.
+
 ## Command line
 
 The subcommands mirror the shell front end of the elisp package.
 
 ```
-writing-schedule generate  TABLE --week 2026-01-19 [--dir OUT] [--no-ics] [--no-todo] [--tz ZONE]
-writing-schedule export    TABLE --week 2026-01-19 [--dir OUT] [--tz ZONE]
-writing-schedule sheets    TABLE --week 2026-01-19 [--dir OUT] [--engine reportlab|latex] [--format pdf|org|both] [--per-day]
+writing-schedule generate  TABLE (--week 2026-01-19 | --day 2026-01-21|today) [--dir OUT] [--no-ics] [--no-todo] [--tz ZONE]
+writing-schedule export    TABLE (--week 2026-01-19 | --day 2026-01-21|today) [--dir OUT] [--tz ZONE]
+writing-schedule sheets    TABLE (--week 2026-01-19 | --day 2026-01-21|today) [--dir OUT] [--engine reportlab|latex] [--format pdf|org|both] [--per-day]
 writing-schedule template  N [--out FILE]
 writing-schedule weeks     [--dir OUT]
 ```
 
 `--week` takes any date inside the target week, because the week snaps to the
-Monday on or before that date. Examples:
+Monday on or before that date. `--day` instead names one day, as a date or the
+word `today`. On `generate` and `export` it writes `day-<ISO>.org` and
+`day-<ISO>.ics` for that day; on `sheets` it prints only that day's sheet.
+Give one or the other. Examples:
 
 ```
 writing-schedule generate examples/projects-and-tasks.org --week 2026-01-19 --dir out
+writing-schedule generate examples/projects-and-tasks.org --day today --dir out
 writing-schedule sheets   examples/projects-and-tasks.org --week 2026-01-19 --dir out --format both
-writing-schedule sheets   examples/projects-and-tasks.org --week 2026-01-19 --dir out --engine latex
+writing-schedule sheets   examples/projects-and-tasks.org --day today --dir out --format both
 ```
 
 ## Library

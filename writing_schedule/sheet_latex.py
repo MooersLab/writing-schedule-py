@@ -13,8 +13,7 @@ from typing import List, Optional, Tuple
 
 from .config import Config
 from .model import Event, ParsedTable
-from .sheet_common import page_split, tidy
-from .week import DAY_FULL, day_of_week, iso_date
+from .sheet_common import iter_days, page_split, tidy
 
 _LATEX_ESCAPES = [
     ("\\", "\\textbackslash{}"),
@@ -132,19 +131,22 @@ def _day(date_str, key_str, spans, cfg: Config) -> str:
 
 
 def render_latex(
-    parsed: ParsedTable, monday: _dt.date, config: Optional[Config] = None
+    parsed: ParsedTable,
+    monday: _dt.date,
+    config: Optional[Config] = None,
+    day: Optional[_dt.date] = None,
 ) -> str:
-    """Return a full LaTeX document with a two-page sheet per day."""
+    """Return a full LaTeX document with a two-page sheet per day.
+
+    When ``day`` is a date, emit only that one day, which is how the day-scoped
+    sheet command prints the plan for a single day.
+    """
     cfg = config or Config()
     legend = dict(cfg.effective_legend(parsed.legend))
     key_str = _key([(ltr, legend.get(ltr, "")) for ltr in parsed.letters])
-    offsets = sorted({off for _, off in parsed.columns})
 
     day_docs = []
-    for off in offsets:
-        d = day_of_week(monday, off)
-        date_str = f"{iso_date(d)} ({DAY_FULL[d.weekday()]})"
-        events = [e for e in parsed.events if e.offset == off]
+    for _d, date_str, events in iter_days(parsed, monday, only=day):
         day_docs.append(_day(date_str, key_str, _spans(events, cfg.timeblock_subrows), cfg))
 
     return (

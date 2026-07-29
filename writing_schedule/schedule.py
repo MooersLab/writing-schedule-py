@@ -10,7 +10,7 @@ import datetime as _dt
 from typing import List, Optional, Tuple
 
 from .config import Config
-from .week import iso_date, timestamp, week_monday
+from .week import DAY_FULL, iso_date, resolve_date, timestamp, week_monday
 from .model import Event, MapEntry, ParsedTable, map_get
 from .parser import minutes_between
 
@@ -139,3 +139,57 @@ def generate_schedule(
 def schedule_filename(monday: _dt.date) -> str:
     """Return the archival file name for the week beginning ``monday``."""
     return f"writing-{iso_date(monday)}.org"
+
+
+def filter_day(parsed: ParsedTable, monday: _dt.date, day: _dt.date) -> ParsedTable:
+    """Return a copy of ``parsed`` holding only ``day``'s blocks.
+
+    The legend is kept whole, so the key and mapping still describe every
+    code, while events, letters, and columns are narrowed to the one day.
+    """
+    off = (day - monday).days
+    events = [e for e in parsed.events if e.offset == off]
+    letters = sorted({e.letter for e in events})
+    columns = [c for c in parsed.columns if c[1] == off]
+    return ParsedTable(events=events, legend=parsed.legend,
+                       letters=letters, columns=columns)
+
+
+def day_schedule_title(day: _dt.date) -> str:
+    """The default single-day schedule title, e.g. ``... (2026-01-21 Wednesday)``."""
+    return f"Writing Schedule ({iso_date(day)} {DAY_FULL[day.weekday()]})"
+
+
+def day_schedule_filename(day: _dt.date) -> str:
+    """Return the file name for a single day's schedule, ``day-<ISO>.org``.
+
+    The ``day-`` prefix keeps these out of the weekly archive, which lists
+    only ``writing-<Monday>.org`` files, so a reprinted day never shadows or
+    overwrites the week it belongs to.
+    """
+    return f"day-{iso_date(day)}.org"
+
+
+def generate_day_schedule(
+    parsed: ParsedTable,
+    day,
+    config: Optional[Config] = None,
+    title: Optional[str] = None,
+) -> Tuple[_dt.date, str, str, ParsedTable]:
+    """Return ``(monday, title, body, day_parsed)`` for one day's schedule.
+
+    ``day`` is a date, an ISO string, or the word ``today``.  ``day_parsed``
+    is the table narrowed to that day, ready for :func:`build_ics`.  ``body``
+    is the full file text including the Summary section, with each event
+    stamped on its real date, exactly as in the weekly schedule.
+    """
+    cfg = config or Config()
+    d = day if isinstance(day, _dt.date) else resolve_date(day)
+    monday = week_monday(d)
+    day_parsed = filter_day(parsed, monday, d)
+    ttl = title or day_schedule_title(d)
+    mapping = legend_mapping(day_parsed.letters, day_parsed.legend)
+    body = build_org(day_parsed.events, mapping, monday, ttl, cfg) + summary(
+        day_parsed.events, mapping
+    )
+    return monday, ttl, body, day_parsed

@@ -27,7 +27,7 @@ import pytest
 
 from writing_schedule.archive import archived_weeks
 from writing_schedule.config import Config
-from writing_schedule.model import Event, MapEntry, map_get
+from writing_schedule.model import Event, MapEntry, ParsedTable, map_get
 from writing_schedule.orgtable import HLINE as H
 from writing_schedule.parser import (
     day_offset,
@@ -35,12 +35,20 @@ from writing_schedule.parser import (
     parse_table,
     parse_time,
 )
-from writing_schedule.schedule import build_org, legend_mapping, schedule_filename, summary
+from writing_schedule.schedule import (
+    build_org,
+    day_schedule_filename,
+    filter_day,
+    generate_day_schedule,
+    legend_mapping,
+    schedule_filename,
+    summary,
+)
 from writing_schedule.sheet_common import block_rows
 from writing_schedule.sheet_latex import _colspec, _spans, latex_escape
 from writing_schedule.sheet_org import build_week_org
 from writing_schedule.template import _blank_row, template_string
-from writing_schedule.week import iso_date, timestamp, week_monday
+from writing_schedule.week import iso_date, resolve_date, timestamp, week_monday
 
 MON = dt.date(2026, 1, 19)  # a Monday
 
@@ -429,6 +437,77 @@ def test_timeblock__org_document():
     assert ":booktabs t" in org
     assert "| Time | Code | Task | Revision |" in org
     assert "| 4:00-5:30 | A | docking | |" in org
+
+
+def test_timeblock__org_document_single_day():
+    """writing-schedule/timeblock/org-document-single-day"""
+    table = [["Time <l>", "M", "Tu"], H, ["04:00-05:30", "A", "EM"], H,
+             ["A: docking", "", ""], ["EM: email", "", ""]]
+    org = build_week_org(parse_table(table), MON, day=dt.date(2026, 1, 20))
+    assert "#+TITLE: Time-Block Sheet, 2026-01-20" in org
+    assert "\n* 2026-01-20 (Tuesday)" in org
+    # Only the chosen day appears.
+    assert "2026-01-19 (Monday)" not in org
+    assert "| 4:00-5:30 | EM | email | |" in org
+
+
+def test_timeblock__latex_single_day():
+    """writing-schedule/timeblock/latex-single-day"""
+    from writing_schedule.sheet_latex import render_latex
+    table = [["Time <l>", "M", "Tu"], H, ["Gen:", "", ""],
+             ["04:00-05:30", "A", "EM"], H,
+             ["A: docking", "", ""], ["EM: email", "", ""]]
+    doc = render_latex(parse_table(table), MON, day=dt.date(2026, 1, 20))
+    assert "Date: 2026-01-20 (Tuesday)" in doc
+    assert "Date: 2026-01-19 (Monday)" not in doc
+    # A single day is one sheet, so there is no page break between days.
+    assert "\\clearpage" not in doc
+
+
+# --- writing-schedule single-day schedule -----------------------------------
+
+def test_filter_day__narrows_events_but_keeps_legend():
+    """writing-schedule/filter-day/narrows-events-but-keeps-legend"""
+    events = [Event("Gen", 0, "04:00", "05:30", "A"),
+              Event("Gen", 1, "04:00", "05:30", "B"),
+              Event("Gen", 1, "09:00", "10:00", "A")]
+    parsed = ParsedTable(events=events,
+                         legend=[("A", "Alpha"), ("B", "Beta")],
+                         letters=["A", "B"], columns=[(1, 0), (2, 1)])
+    fp = filter_day(parsed, MON, dt.date(2026, 1, 20))  # Tuesday, offset 1
+    assert len(fp.events) == 2
+    assert all(e.offset == 1 for e in fp.events)
+    assert fp.letters == ["A", "B"]
+    assert fp.legend == parsed.legend          # legend kept whole
+    assert fp.columns == [(2, 1)]
+
+
+def test_generate_day_schedule__body_filename_and_filter():
+    """writing-schedule/generate-day-schedule/body-filename-and-filter"""
+    events = [Event("Gen", 0, "04:00", "05:30", "A"),
+              Event("Gen", 2, "09:00", "10:30", "B")]
+    parsed = ParsedTable(events=events,
+                         legend=[("A", "Alpha"), ("B", "Beta")],
+                         letters=["A", "B"], columns=[(1, 0), (3, 2)])
+    monday, title, body, dp = generate_day_schedule(parsed, "2026-01-21")  # Wed
+    assert monday == MON
+    assert title == "Writing Schedule (2026-01-21 Wednesday)"
+    assert "#+TITLE: Writing Schedule (2026-01-21 Wednesday)" in body
+    assert "<2026-01-21 Wed 09:00-10:30>" in body
+    assert "2026-01-19 Mon" not in body        # Monday's block is excluded
+    assert "* Summary" in body
+    assert "- B = 1.50 h (Beta)" in body
+    assert dp.events and all(e.offset == 2 for e in dp.events)
+    assert day_schedule_filename(dt.date(2026, 1, 21)) == "day-2026-01-21.org"
+
+
+# --- writing-schedule--resolve-date -----------------------------------------
+
+def test_resolve_date__today_and_iso():
+    """writing-schedule/resolve-date/today-and-iso"""
+    assert resolve_date("2026-01-20") == dt.date(2026, 1, 20)
+    assert resolve_date(dt.date(2026, 1, 20)) == dt.date(2026, 1, 20)
+    assert resolve_date("  Today ") == dt.date.today()
 
 
 # --- writing-schedule--legend-mapping ---------------------------------------

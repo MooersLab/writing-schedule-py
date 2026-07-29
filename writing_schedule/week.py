@@ -28,6 +28,19 @@ def to_date(value: DateLike) -> _dt.date:
     return _dt.date.fromisoformat(value.strip())
 
 
+def resolve_date(value: DateLike) -> _dt.date:
+    """Return a concrete date for ``value``.
+
+    ``value`` is an ISO date string, a :class:`datetime.date`, or the word
+    ``today`` (any case, surrounding space tolerated), which resolves to the
+    current local date.  This lets a caller name a specific day or ask for
+    today, which is what the day-scoped sheet commands accept.
+    """
+    if isinstance(value, str) and value.strip().lower() == "today":
+        return _dt.date.today()
+    return to_date(value)
+
+
 def week_monday(value: DateLike) -> _dt.date:
     """Return the Monday on or before ``value``.
 

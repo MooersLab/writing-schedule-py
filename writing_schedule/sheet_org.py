@@ -12,7 +12,8 @@ from typing import List, Optional
 
 from .config import Config
 from .model import ParsedTable
-from .week import DAY_FULL, day_of_week, iso_date
+from .sheet_common import iter_days
+from .week import iso_date
 
 
 def _tidy(hhmm: str) -> str:
@@ -21,15 +22,26 @@ def _tidy(hhmm: str) -> str:
 
 
 def build_week_org(
-    parsed: ParsedTable, monday: _dt.date, config: Optional[Config] = None
+    parsed: ParsedTable,
+    monday: _dt.date,
+    config: Optional[Config] = None,
+    day: Optional[_dt.date] = None,
 ) -> str:
-    """Return the editable week org document as a string."""
+    """Return the editable org document as a string.
+
+    By default the document covers the whole week, one section per day.  When
+    ``day`` is a date, the document covers only that day, so you can edit and
+    print the plan for a single day.
+    """
     cfg = config or Config()
     legend = dict(cfg.effective_legend(parsed.legend))
-    offsets = sorted({off for _, off in parsed.columns})
 
     out: List[str] = []
-    out.append(f"#+TITLE: Time-Block Sheets, week of {iso_date(monday)}\n")
+    if day is not None:
+        title = f"Time-Block Sheet, {iso_date(day)}"
+    else:
+        title = f"Time-Block Sheets, week of {iso_date(monday)}"
+    out.append(f"#+TITLE: {title}\n")
     out.append("#+LaTeX_HEADER: \\usepackage[margin=0.5in]{geometry}\n")
     out.append("#+OPTIONS: toc:nil\n\n")
 
@@ -42,13 +54,8 @@ def build_week_org(
     out.append("\n\n")
 
     day_blocks: List[str] = []
-    for off in offsets:
-        d = day_of_week(monday, off)
-        date_str = f"{iso_date(d)} ({DAY_FULL[d.weekday()]})"
-        day_events = sorted(
-            (e for e in parsed.events if e.offset == off),
-            key=lambda e: e.start,
-        )
+    for _d, date_str, evs in iter_days(parsed, monday, only=day):
+        day_events = sorted(evs, key=lambda e: e.start)
         rows = ["* " + date_str]
         rows.append(f"#+CAPTION: Planned time blocks for {date_str}.")
         rows.append("#+ATTR_LATEX: :booktabs t")
