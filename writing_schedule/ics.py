@@ -59,8 +59,12 @@ def _hhmmss(hhmm: str) -> str:
 
 
 def _uid(iso: str, start: str, end: str, letter: str, section: str, n: int) -> str:
+    # MD5 here only derives a short, stable identifier for a calendar event; it
+    # guards nothing, so usedforsecurity=False marks it as non-cryptographic
+    # and keeps this off the security-hash finding (CWE-327).  The digest is
+    # unchanged by the flag, so existing UIDs stay stable.
     key = f"{iso}|{start}|{end}|{letter}|{section}|{n}"
-    digest = hashlib.md5(key.encode("utf-8")).hexdigest()[:20]
+    digest = hashlib.md5(key.encode("utf-8"), usedforsecurity=False).hexdigest()[:20]
     return f"{digest}@writing-schedule.py"
 
 

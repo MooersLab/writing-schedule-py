@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "writing-schedule"
-version = "0.2.0"
+version = "0.1.0"
 description = "Turn a weekly org-mode block table into a dated schedule, an iCalendar file, and a printable time-block PDF."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -20,6 +20,9 @@ dependencies = ["reportlab>=3.6"]
 
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
+# bandit[toml] lets bandit read its config from this pyproject on Python 3.9
+# and 3.10, where tomllib is not in the standard library.
+security = ["bandit[toml]>=1.7"]
 
 [project.scripts]
 writing-schedule = "writing_schedule.cli:main"
@@ -32,3 +35,10 @@ packages = ["writing_schedule"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.bandit]
+# Exclude the test tree and build artifacts from security scans. The tests use
+# pytest assert statements, which bandit reports as B101 (assert_used); that is
+# expected in a test suite and is not a runtime security concern. Scan with:
+#   bandit -c pyproject.toml -r .
+exclude_dirs = ["tests", "build", ".pytest_cache"]
