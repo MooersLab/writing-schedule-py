@@ -16,6 +16,8 @@ from writing_schedule.cli import main
 from writing_schedule.parser import parse_text
 from writing_schedule.sheet import block_box, render_day_pdf, render_week_pdf
 from writing_schedule.sheet_common import block_hours, iter_days
+from writing_schedule.sheet_latex import render_latex
+from writing_schedule.sheet_org import build_week_org
 from writing_schedule.week import day_of_week, week_monday
 
 MON = week_monday("2026-01-19")
@@ -120,6 +122,115 @@ def test_generate_cli_requires_week_or_day(tmp_path, capsys):
     rc = main(["generate", str(_mini_table(tmp_path)), "--dir", str(tmp_path / "o")])
     assert rc == 2
     assert "--week" in capsys.readouterr().err
+
+
+# --- overlap warning, strict, and check -------------------------------------
+
+def _overlap_table(tmp_path):
+    src = tmp_path / "clash.org"
+    src.write_text(
+        "| Time <l> | M | Tu |\n"
+        "|-\n"
+        "| Generative |  |  |\n"
+        "| 09:00-10:30 | A | C |\n"
+        "|-\n"
+        "| Support |  |  |\n"
+        "| 10:00-11:00 | B |  |\n"
+        "|-\n"
+        "| A: writing |  |  |\n"
+        "| B: email |  |  |\n"
+        "| C: outline |  |  |\n"
+    )
+    return src
+
+
+def test_check_cli_reports_overlap_and_exits_3(tmp_path, capsys):
+    rc = main(["check", str(_overlap_table(tmp_path))])
+    assert rc == 3
+    out = capsys.readouterr().out
+    assert "Monday" in out
+    assert "overlaps" in out
+
+
+def test_check_cli_clean_table_exits_0(tmp_path, capsys):
+    rc = main(["check", str(_mini_table(tmp_path))])
+    assert rc == 0
+    assert "No overlapping" in capsys.readouterr().out
+
+
+def test_generate_cli_warns_but_still_writes(tmp_path, capsys):
+    out = tmp_path / "o"
+    rc = main(["generate", str(_overlap_table(tmp_path)), "--week", "2026-01-19",
+               "--dir", str(out)])
+    assert rc == 0
+    assert (out / "writing-2026-01-19.org").exists()
+    err = capsys.readouterr().err
+    assert "warning" in err
+    assert "Monday" in err
+
+
+def test_generate_cli_strict_refuses_on_overlap(tmp_path, capsys):
+    out = tmp_path / "o"
+    rc = main(["generate", str(_overlap_table(tmp_path)), "--week", "2026-01-19",
+               "--dir", str(out), "--strict"])
+    assert rc == 3
+    assert not out.exists() or not list(out.glob("*.org"))
+    assert "error" in capsys.readouterr().err
+
+
+def test_export_cli_strict_refuses_on_overlap(tmp_path):
+    out = tmp_path / "o"
+    rc = main(["export", str(_overlap_table(tmp_path)), "--week", "2026-01-19",
+               "--dir", str(out), "--strict"])
+    assert rc == 3
+    assert not out.exists() or not list(out.glob("*.ics"))
+
+
+def test_generate_day_only_reports_that_day(tmp_path, capsys):
+    # The clash is on Monday, so a Tuesday run reports nothing and writes.
+    out = tmp_path / "o"
+    rc = main(["generate", str(_overlap_table(tmp_path)), "--day", "2026-01-20",
+               "--dir", str(out), "--strict"])
+    assert rc == 0
+    err = capsys.readouterr().err
+    assert "overlap" not in err.lower()
+
+
+# --- sheet marking of overlaps ----------------------------------------------
+
+def test_org_sheet_marks_overlap(tmp_path):
+    parsed = parse_text(_overlap_table(tmp_path).read_text())
+    monday = week_monday("2026-01-19")
+    text = build_week_org(parsed, monday)
+    assert "9:00-10:30*" in text
+    assert "overlaps another block" in text
+
+
+def test_org_sheet_clean_has_no_mark(tmp_path):
+    # Org headlines legitimately start with "*", so check the block mark and
+    # the note, not the raw asterisk.
+    parsed = parse_text(_mini_table(tmp_path).read_text())
+    text = build_week_org(parsed, week_monday("2026-01-19"))
+    assert "overlaps another block" not in text
+    assert "5:30*" not in text
+
+
+def test_latex_sheet_marks_overlap(tmp_path):
+    parsed = parse_text(_overlap_table(tmp_path).read_text())
+    tex = render_latex(parsed, week_monday("2026-01-19"))
+    assert "$^{*}$" in tex
+    assert "overlaps another block" in tex
+
+
+def test_reportlab_day_sheet_notes_overlap(tmp_path):
+    from pypdf import PdfReader
+
+    parsed = parse_text(_overlap_table(tmp_path).read_text())
+    monday = week_monday("2026-01-19")
+    p = tmp_path / "day.pdf"
+    render_day_pdf(parsed, monday, day_of_week(monday, 0), str(p))
+    text = "".join(page.extract_text() for page in PdfReader(str(p)).pages)
+    assert "overlaps another block" in text
 
 
 def test_block_box_height_is_proportional_to_time():

@@ -18,6 +18,7 @@ from typing import List, Optional
 
 from .config import Config
 from .ics import build_ics
+from .overlap import find_overlaps, overlap_lines
 from .parser import parse_text
 from .schedule import (
     generate_day_schedule,
@@ -45,6 +46,35 @@ def _config_from_args(args) -> Config:
     return cfg
 
 
+# Exit code returned when --strict finds an overlap and refuses to write.
+STRICT_EXIT = 3
+
+
+def _overlap_guard(parsed, args, only_offset: Optional[int] = None) -> Optional[int]:
+    """Report overlapping blocks. Return an exit code to abort, or None.
+
+    The command line cannot prompt, so the default is to warn and continue,
+    which matches the shell and the Emacs batch paths.  With ``--strict`` the
+    warning becomes an error and the caller aborts before writing.  When
+    ``only_offset`` is given, only that day's clashes are reported, which is
+    right for a single-day run.
+    """
+    conflicts = find_overlaps(parsed.events)
+    if only_offset is not None:
+        conflicts = [c for c in conflicts if c.offset == only_offset]
+    if not conflicts:
+        return None
+    strict = getattr(args, "strict", False)
+    label = "error" if strict else "warning"
+    print(f"{label}: overlapping time blocks:", file=sys.stderr)
+    for line in overlap_lines(conflicts):
+        print(f"  {line}", file=sys.stderr)
+    if strict:
+        print("No files written (strict mode).", file=sys.stderr)
+        return STRICT_EXIT
+    return None
+
+
 def _cmd_generate(args) -> int:
     cfg = _config_from_args(args)
     if not args.week and not args.day:
@@ -55,8 +85,11 @@ def _cmd_generate(args) -> int:
     if not parsed.events:
         print("No filled time blocks found in the table", file=sys.stderr)
         return 2
-    if args.day:
-        day = resolve_date(args.day)
+    day = resolve_date(args.day) if args.day else None
+    rc = _overlap_guard(parsed, args, day.weekday() if day else None)
+    if rc is not None:
+        return rc
+    if day is not None:
         monday, title, body, ics_parsed = generate_day_schedule(parsed, day, cfg)
         if not ics_parsed.events:
             print(f"No filled time blocks for {iso_date(day)}", file=sys.stderr)
@@ -90,8 +123,11 @@ def _cmd_export(args) -> int:
     if not parsed.events:
         print("No filled time blocks found in the table", file=sys.stderr)
         return 2
-    if args.day:
-        day = resolve_date(args.day)
+    day = resolve_date(args.day) if args.day else None
+    rc = _overlap_guard(parsed, args, day.weekday() if day else None)
+    if rc is not None:
+        return rc
+    if day is not None:
         monday, title, _body, ics_parsed = generate_day_schedule(parsed, day, cfg)
         if not ics_parsed.events:
             print(f"No filled time blocks for {iso_date(day)}", file=sys.stderr)
@@ -121,6 +157,9 @@ def _cmd_sheets(args) -> int:
 
     # A named day fixes both the day and its week; otherwise the week is used.
     day = resolve_date(args.day) if args.day else None
+    rc = _overlap_guard(parsed, args, day.weekday() if day else None)
+    if rc is not None:
+        return rc
     monday = week_monday(day) if day is not None else week_monday(args.week)
     stamp = iso_date(monday)
     os.makedirs(args.dir, exist_ok=True)
@@ -164,6 +203,18 @@ def _iter_days(parsed, monday):
     return iter_days(parsed, monday)
 
 
+def _cmd_check(args) -> int:
+    parsed = parse_text(_read(args.table))
+    conflicts = find_overlaps(parsed.events)
+    if not conflicts:
+        print(f"No overlapping time blocks in {args.table}")
+        return 0
+    print(f"Overlapping time blocks in {args.table}:")
+    for line in overlap_lines(conflicts):
+        print(f"  {line}")
+    return STRICT_EXIT
+
+
 def _cmd_template(args) -> int:
     text = template_string(args.n)
     if args.out:
@@ -190,6 +241,11 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="writing-schedule",
         description="Turn a weekly org-table into a schedule, calendar, and sheets.",
+        epilog=(
+            "Run this tool from the root of the writing-schedule directory, "
+            "because the example tables and the default paths are resolved "
+            "relative to that directory."
+        ),
     )
     sub = p.add_subparsers(dest="command", required=True)
 
@@ -204,6 +260,8 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--no-ics", action="store_true", help="skip the .ics file")
     g.add_argument("--no-todo", action="store_true", help="omit the TODO keyword")
     g.add_argument("--tz", help="IANA time zone (empty string for floating times)")
+    g.add_argument("--strict", action="store_true",
+                   help="treat overlapping time blocks as an error and write nothing")
     g.set_defaults(func=_cmd_generate)
 
     e = sub.add_parser("export", help="write only the .ics for a table and week or day")
@@ -216,6 +274,8 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--dir", default=".", help="output directory")
     e.add_argument("--no-todo", action="store_true")
     e.add_argument("--tz", help="IANA time zone")
+    e.add_argument("--strict", action="store_true",
+                   help="treat overlapping time blocks as an error and write nothing")
     e.set_defaults(func=_cmd_export)
 
     s = sub.add_parser("sheets", help="draw printable time-block sheets")
@@ -229,6 +289,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--engine", choices=["reportlab", "latex"], default="reportlab")
     s.add_argument("--format", choices=["pdf", "org", "both"], default="pdf")
     s.add_argument("--per-day", action="store_true", help="one PDF per day (reportlab)")
+    s.add_argument("--strict", action="store_true",
+                   help="treat overlapping time blocks as an error and write nothing")
     s.set_defaults(func=_cmd_sheets)
 
     t = sub.add_parser("template", help="print or write a blank weekly table")
@@ -239,6 +301,13 @@ def build_parser() -> argparse.ArgumentParser:
     w = sub.add_parser("weeks", help="list archived weekly schedule files")
     w.add_argument("--dir", default=".", help="directory to scan")
     w.set_defaults(func=_cmd_weeks)
+
+    c = sub.add_parser(
+        "check",
+        help="report overlapping time blocks in a table; exit 3 when any are found",
+    )
+    c.add_argument("table", help="path to the org table file")
+    c.set_defaults(func=_cmd_check)
 
     return p
 

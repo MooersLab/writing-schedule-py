@@ -13,6 +13,7 @@ from typing import List, Optional, Tuple
 
 from .config import Config
 from .model import Event, ParsedTable
+from .overlap import conflicting_identities, event_identity
 from .sheet_common import iter_days, page_split, tidy
 
 _LATEX_ESCAPES = [
@@ -44,14 +45,16 @@ def _key(pairs: List[Tuple[str, str]]) -> str:
     return ",\\quad ".join(parts)
 
 
-def _spans(events: List[Event], subrows: int) -> List[Tuple[int, int, str]]:
+def _spans(events: List[Event], subrows: int, marked=None) -> List[Tuple[int, int, str]]:
+    marked = marked or set()
     spans = []
     for ev in events:
         sh, sm = int(ev.start[0:2]), int(ev.start[3:5])
         eh, em = int(ev.end[0:2]), int(ev.end[3:5])
         sg = sh * subrows + min(subrows - 1, (sm * subrows) // 60)
         eg = eh * subrows + min(subrows, (em * subrows) // 60)
-        label = f"{ev.letter}\\quad {tidy(ev.start)}-{tidy(ev.end)}"
+        star = "$^{*}$" if event_identity(ev) in marked else ""
+        label = f"{ev.letter}\\quad {tidy(ev.start)}-{tidy(ev.end)}{star}"
         if eg <= sg:
             eg = sg + 1
         spans.append((sg, eg, label))
@@ -117,16 +120,22 @@ def _page(date_str, key_str, spans, lo, hi, ncols, subrows) -> str:
     )
 
 
-def _day(date_str, key_str, spans, cfg: Config) -> str:
+def _day(date_str, key_str, spans, cfg: Config, note: bool = False) -> str:
     lo = cfg.timeblock_start_hour
     hi = cfg.timeblock_end_hour
     ncols = cfg.timeblock_columns
     sub = cfg.timeblock_subrows
     mid = page_split(lo, hi)
+    footnote = (
+        "\n\\par\\smallskip{\\footnotesize $^{*}$ overlaps another block "
+        "on this day.}\n"
+        if note else ""
+    )
     return (
         _page(date_str, key_str, spans, lo, mid, ncols, sub)
         + "\n\\newpage\n"
         + _page(date_str, key_str, spans, mid + 1, hi, ncols, sub)
+        + footnote
     )
 
 
@@ -144,10 +153,13 @@ def render_latex(
     cfg = config or Config()
     legend = dict(cfg.effective_legend(parsed.legend))
     key_str = _key([(ltr, legend.get(ltr, "")) for ltr in parsed.letters])
+    marked = conflicting_identities(parsed.events)
 
     day_docs = []
     for _d, date_str, events in iter_days(parsed, monday, only=day):
-        day_docs.append(_day(date_str, key_str, _spans(events, cfg.timeblock_subrows), cfg))
+        note = any(event_identity(e) in marked for e in events)
+        spans = _spans(events, cfg.timeblock_subrows, marked)
+        day_docs.append(_day(date_str, key_str, spans, cfg, note))
 
     return (
         _preamble()

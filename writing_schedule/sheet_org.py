@@ -12,6 +12,7 @@ from typing import List, Optional
 
 from .config import Config
 from .model import ParsedTable
+from .overlap import conflicting_identities, event_identity
 from .sheet_common import iter_days
 from .week import iso_date
 
@@ -35,6 +36,7 @@ def build_week_org(
     """
     cfg = config or Config()
     legend = dict(cfg.effective_legend(parsed.legend))
+    marked = conflicting_identities(parsed.events)
 
     out: List[str] = []
     if day is not None:
@@ -61,15 +63,24 @@ def build_week_org(
         rows.append("#+ATTR_LATEX: :booktabs t")
         rows.append("| Time | Code | Task | Revision |")
         rows.append("|-")
+        day_flagged = False
         if day_events:
             for e in day_events:
                 task = legend.get(e.letter, "")
+                star = "*" if event_identity(e) in marked else ""
+                if star:
+                    day_flagged = True
                 rows.append(
-                    f"| {_tidy(e.start)}-{_tidy(e.end)} | {e.letter} | {task} | |"
+                    f"| {_tidy(e.start)}-{_tidy(e.end)}{star} "
+                    f"| {e.letter} | {task} | |"
                 )
         else:
             rows.append("| | | | |")
-        day_blocks.append("\n".join(rows) + "\n")
+        block = "\n".join(rows) + "\n"
+        if day_flagged:
+            block += ("\nNote: a time marked with * overlaps another block "
+                      "on this day.\n")
+        day_blocks.append(block)
 
     out.append("\n".join(day_blocks))
     return "".join(out)

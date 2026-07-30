@@ -86,6 +86,19 @@ The `sheets` command writes `sheet-<ISO>.pdf`, and `sheet-<ISO>.org` with
 `day-<ISO>.ics` for that day alone, and the `day-` prefix keeps it out of the
 weekly archive, so there is no need to redo the whole week to refresh one day.
 
+Because the generative, editing, and support blocks sit in separate row groups,
+it is easy to place two blocks on the same day that overlap. Every command
+checks for this. The `generate`, `export`, and `sheets` commands warn and still
+write, and the printed sheet marks each clashing block with an asterisk. Run
+`writing-schedule check my-week.org` to list the clashes on their own, or add
+`--strict` to a command to make it stop and write nothing until you fix the
+table.
+
+```
+writing-schedule check my-week.org
+writing-schedule generate my-week.org --week 2026-01-19 --dir out --strict
+```
+
 To rework a saved week, list the archive and open the file you want:
 
 ```

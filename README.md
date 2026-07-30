@@ -1,5 +1,5 @@
 # writing-schedule (Python)
-![Version](https://img.shields.io/static/v1?label=writing-schdule-py&message=0.2.0&color=brightcolor)
+![Version](https://img.shields.io/static/v1?label=writing-schdule-py&message=0.1.0&color=brightcolor)
 [![PyPI version](https://img.shields.io/pypi/v/writing-schedule.svg)](https://pypi.org/project/writing-schedule/)
 [![Python versions](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://pypi.org/project/writing-schedule/)
 [![Documentation Status](https://readthedocs.org/projects/writing-schedule-py/badge/?version=latest)](https://writing-schedule-py.readthedocs.io/en/latest/?badge=latest)
@@ -152,14 +152,37 @@ these out of the weekly archive, so a redone day never overwrites the week.
 The day sets its own week, so `--week` is not needed with `--day`. A day the
 table has no column for prints as a blank sheet.
 
+### Step 5, catch overlapping time blocks
+
+The table places generative, editing, and support activities in separate row
+groups, so the same day can carry a block in one group and a clashing block in
+another without your noticing. Every command checks for such clashes. By
+default `generate`, `export`, and `sheets` print a warning that names the
+conflicting blocks and still write the output, because a worksheet with the
+clash marked is more useful than no output at all. Pass `--strict` to turn the
+warning into an error that writes nothing until you fix the table.
+
+```
+writing-schedule check    examples/my-week.org
+writing-schedule generate examples/my-week.org --week 2026-01-19 --dir out --strict
+```
+
+The `check` command reports the clashes and exits 3 when it finds any, so it
+fits a pre-commit hook or a continuous integration step. On the printed sheet
+each clashing block is marked with an asterisk and a footnote, so the overlap
+is visible on paper. Two blocks that merely touch, for example 04:00-05:30
+followed by 05:30-07:00, do not count as a clash. A block that crosses midnight
+is compared only against other blocks on its own day.
+
 ## Command line
 
 The subcommands mirror the shell front end of the elisp package.
 
 ```
-writing-schedule generate  TABLE (--week 2026-01-19 | --day 2026-01-21|today) [--dir OUT] [--no-ics] [--no-todo] [--tz ZONE]
-writing-schedule export    TABLE (--week 2026-01-19 | --day 2026-01-21|today) [--dir OUT] [--tz ZONE]
-writing-schedule sheets    TABLE (--week 2026-01-19 | --day 2026-01-21|today) [--dir OUT] [--engine reportlab|latex] [--format pdf|org|both] [--per-day]
+writing-schedule generate  TABLE (--week 2026-01-19 | --day 2026-01-21|today) [--dir OUT] [--no-ics] [--no-todo] [--tz ZONE] [--strict]
+writing-schedule export    TABLE (--week 2026-01-19 | --day 2026-01-21|today) [--dir OUT] [--tz ZONE] [--strict]
+writing-schedule sheets    TABLE (--week 2026-01-19 | --day 2026-01-21|today) [--dir OUT] [--engine reportlab|latex] [--format pdf|org|both] [--per-day] [--strict]
+writing-schedule check     TABLE
 writing-schedule template  N [--out FILE]
 writing-schedule weeks     [--dir OUT]
 ```

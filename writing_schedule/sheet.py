@@ -26,6 +26,7 @@ from reportlab.pdfgen import canvas
 
 from .config import Config
 from .model import Event, ParsedTable
+from .overlap import conflicting_identities, event_identity
 from .sheet_common import block_hours, iter_days, key_pairs, page_split, tidy
 
 _PAGE = letter
@@ -91,7 +92,8 @@ def _key_text(pairs: List[Tuple[str, str]]) -> str:
 
 def _draw_page(c: canvas.Canvas, date_str: str, key_text: str,
                events: List[Event], page_lo: int, page_hi: int,
-               cfg: Config) -> None:
+               cfg: Config, marked=None) -> None:
+    marked = marked or set()
     pw, ph = _PAGE
     ncols = cfg.timeblock_columns
     subrows = cfg.timeblock_subrows
@@ -126,9 +128,13 @@ def _draw_page(c: canvas.Canvas, date_str: str, key_text: str,
     def y_of(t_hours: float) -> float:
         return grid_top - (t_hours - page_lo) * hour_h
 
-    # Date row text.
+    # Date row text.  Append a note when this day has an overlap on it.
+    day_has_mark = any(event_identity(ev) in marked for ev in events)
     c.setFont("Helvetica", 9)
-    c.drawString(left + 4, table_top - 13, f"Date: {date_str}")
+    date_text = f"Date: {date_str}"
+    if day_has_mark:
+        date_text += "     * = overlaps another block"
+    c.drawString(left + 4, table_top - 13, date_text)
 
     # --- Hour guide grid ---
     # Light sub-row guides across the plan columns.
@@ -190,18 +196,19 @@ def _draw_page(c: canvas.Canvas, date_str: str, key_text: str,
             c.line(box_left, yb, box_right, yb)
         if not open_top:
             c.setFont("Helvetica-Bold", 8)
-            label = f"{ev.letter}  {tidy(ev.start)}-{tidy(ev.end)}"
+            star = " *" if event_identity(ev) in marked else ""
+            label = f"{ev.letter}  {tidy(ev.start)}-{tidy(ev.end)}{star}"
             c.drawString(box_left + 3, yt - 10, label)
 
 
 def _draw_day(c: canvas.Canvas, date_str: str, key_text: str,
-              events: List[Event], cfg: Config) -> None:
+              events: List[Event], cfg: Config, marked=None) -> None:
     lo = cfg.timeblock_start_hour
     hi = cfg.timeblock_end_hour
     mid = page_split(lo, hi)
-    _draw_page(c, date_str, key_text, events, lo, mid, cfg)
+    _draw_page(c, date_str, key_text, events, lo, mid, cfg, marked)
     c.showPage()
-    _draw_page(c, date_str, key_text, events, mid + 1, hi, cfg)
+    _draw_page(c, date_str, key_text, events, mid + 1, hi, cfg, marked)
     c.showPage()
 
 
@@ -210,10 +217,11 @@ def render_week_pdf(parsed: ParsedTable, monday: _dt.date, path: str,
     """Draw the whole week (two pages per day) into one PDF at ``path``."""
     cfg = config or Config()
     key_text = _key_text(key_pairs(parsed, cfg))
+    marked = conflicting_identities(parsed.events)
     c = canvas.Canvas(path, pagesize=_PAGE)
     c.setTitle(f"Time-block sheets, week of {monday.isoformat()}")
     for _d, date_str, events in iter_days(parsed, monday):
-        _draw_day(c, date_str, key_text, events, cfg)
+        _draw_day(c, date_str, key_text, events, cfg, marked)
     c.save()
     return path
 
@@ -227,9 +235,10 @@ def render_day_pdf(parsed: ParsedTable, monday: _dt.date, day_date: _dt.date,
     """
     cfg = config or Config()
     key_text = _key_text(key_pairs(parsed, cfg))
+    marked = conflicting_identities(parsed.events)
     _d, date_str, events = iter_days(parsed, monday, only=day_date)[0]
     c = canvas.Canvas(path, pagesize=_PAGE)
     c.setTitle(f"Time-block sheet, {day_date.isoformat()}")
-    _draw_day(c, date_str, key_text, events, cfg)
+    _draw_day(c, date_str, key_text, events, cfg, marked)
     c.save()
     return path
