@@ -37,3 +37,6 @@ ENV/
 
 # Deposition notes
 readthedocs-protocol.org
+
+# bandit reports
+security-issues*.txt
