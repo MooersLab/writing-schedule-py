@@ -34,6 +34,8 @@ spellings such as `monday` are not accepted either.
 A section header row is a line whose first cell is a word or a few words with
 an optional trailing colon, such as `Generative:`. It groups the blocks
 beneath it, and its name becomes the `CATEGORY` property in the schedule file.
+An activity letter in a cell or a default activity in the legend overrides it
+for that block.
 The pattern accepts letters and spaces only, so a name that contains a digit,
 such as `Deep Work 1`, is not recognized as a section. Before any section
 header appears, the section is `Writing`.
@@ -42,8 +44,9 @@ header appears, the section is `Writing`.
 
 A time-block row is a row whose first cell holds a time range, such as
 `04:00-05:30`, once the day columns have been found. Each non-empty day cell
-under the time produces one event, and the cell text is upper-cased to become
-the event code.
+under the time produces one event. The cell text is upper-cased to become the
+event code, unless it starts with an activity letter, which the next sections
+describe.
 
 The time reader is forgiving. The following variations all parse to the same
 zero-padded `HH:MM` range.
@@ -72,6 +75,52 @@ important rule in the grammar. It is what separates a code from a section
 header, because `A: docking` is a legend row while `Generative:` is a section
 header. A reader that lower-cased the label before testing would misread every
 section header as a legend row.
+
+## Activity letters in the cells
+
+A day cell may name the activity of its block with one lowercase letter
+before the code. `gA` is generative writing on project A, `eA` is editing
+on A, and `sEM` is support work on EM. The letter becomes the section of
+the event (`Generative`, `Rewriting`, or `Supporting`), so the schedule
+file, the calendar file, the clash check, and the sheets treat the block
+exactly as if it sat under that section header. The code itself is stored
+without the letter.
+
+The letter counts only when it is a lowercase `g`, `e`, or `s` followed by
+a capital. A cell typed all in lowercase, such as `ga`, is still read as
+the code `GA`, as before.
+
+With activity letters, a table needs no section rows at all, and one time
+slot can hold different activities on different days. This suits a writer
+who drafts late in the evening.
+
+```
+| Time        | M  | Tu | W  |
+|-------------+----+----+----|
+| 12:15-13:00 | sE | E  | sE |
+| 17:30-19:00 | eB | eA |    |
+| 21:00-23:30 | gA | gB | gA |
+|-------------+----+----+----|
+| A: DNPH1 docking   |  |  |  |
+| B: DUSP1 radiation |  |  |  |
+| E: email @support  |  |  |  |
+```
+
+## Default activities in the legend
+
+A legend entry may name the usual activity of its code with a tag such as
+`@generative`, `@editing`, or `@support`, as in `E: email @support`. A bare
+`E` in any cell then counts as support. The tag is removed from the
+description, and a risk tag such as `:safe:` may follow it.
+
+The activity of a block comes from the first of these that is present.
+
+1. An activity letter in the cell, such as `eA`.
+2. A default activity on the code's legend entry, such as `@support`.
+3. The section header above the row.
+4. `Writing`, before any section header.
+
+A table without letters or tags parses exactly as before.
 
 ## A worked example
 

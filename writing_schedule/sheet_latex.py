@@ -54,7 +54,7 @@ def _spans(events: List[Event], subrows: int, marked=None) -> List[Tuple[int, in
         sg = sh * subrows + min(subrows - 1, (sm * subrows) // 60)
         eg = eh * subrows + min(subrows, (em * subrows) // 60)
         star = "$^{*}$" if event_identity(ev) in marked else ""
-        label = f"{ev.letter}\\quad {tidy(ev.start)}-{tidy(ev.end)}{star}"
+        label = f"{ev.label}\\quad {tidy(ev.start)}-{tidy(ev.end)}{star}"
         if eg <= sg:
             eg = sg + 1
         spans.append((sg, eg, label))

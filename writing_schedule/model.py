@@ -25,13 +25,22 @@ class Event:
     Attributes
     ----------
     section:
-        The most recent section header, or ``"Writing"`` before any header.
+        The activity section of the block.  It comes from an activity letter
+        in the cell (``gA`` gives ``"Generative"``, ``eA`` ``"Rewriting"``,
+        ``sA`` ``"Supporting"``), else from a default such as ``@support`` on
+        the code's legend entry, else from the most recent section header, or
+        ``"Writing"`` before any header.
     offset:
         Days from Monday (0 = Monday ... 6 = Sunday).
     start, end:
         Zero-padded ``HH:MM`` strings.
     letter:
-        The upper-cased code taken from the day cell.
+        The upper-cased code taken from the day cell, without any activity
+        letter.
+    activity:
+        The lowercase activity letter written in the cell (``g``, ``e``, or
+        ``s``), or ``None`` when the cell carries none.  It is kept so the
+        sheets can print the code as the writer typed it, as in ``gQ``.
     """
 
     section: str
@@ -39,6 +48,12 @@ class Event:
     start: str
     end: str
     letter: str
+    activity: Optional[str] = None
+
+    @property
+    def label(self) -> str:
+        """Return the code as written in the cell, such as ``gQ`` or ``EM``."""
+        return (self.activity or "") + self.letter
 
 
 @dataclass

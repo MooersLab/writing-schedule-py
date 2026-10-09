@@ -39,6 +39,51 @@ _LEGEND_RE = re.compile(r"^([A-Z][A-Z0-9]{0,3})[ \t]*:(.*)$")
 # A section header: letters and spaces only, optional trailing colon.
 _SECTION_RE = re.compile(r"^[A-Za-z][A-Za-z ]*:?$")
 
+# A day cell with an activity letter before the code, as in gA, eB, or sEM.
+# The letter counts only when it is lowercase and the code that follows starts
+# with a capital, so a cell typed all in lowercase, such as "ga", is still the
+# code GA.  Mirrors ``writing-schedule--cell-regexp``.
+_CELL_RE = re.compile(r"^([ges])([A-Z][A-Z0-9]{0,3})$")
+
+#: The section name each activity letter of a day cell stands for.  These are
+#: the names the blank template uses, so a prefixed cell and a cell under the
+#: matching header give the same event.
+ACTIVITY_SECTION = {"g": "Generative", "e": "Rewriting", "s": "Supporting"}
+
+# A default activity in a legend description, as in "E: email @support".
+_LEGEND_ACTIVITY_RE = re.compile(
+    r"(?:^|\s)@(generative|editing|support)\b", re.IGNORECASE)
+
+#: The section name each legend default activity stands for.
+LEGEND_ACTIVITY_SECTION = {
+    "generative": "Generative", "editing": "Rewriting", "support": "Supporting"}
+
+
+def split_cell(cell: Optional[str]) -> Tuple[Optional[str], str]:
+    """Return ``(activity_letter or None, CODE)`` for a day cell.
+
+    ``gA`` gives ``("g", "A")`` and ``A`` gives ``(None, "A")``.  A cell that
+    does not carry a prefix is upper-cased whole, as before.
+    """
+    text = (cell or "").strip()
+    m = _CELL_RE.match(text)
+    if m:
+        return m.group(1), m.group(2)
+    return None, text.upper()
+
+
+def split_legend_activity(desc: str) -> Tuple[str, Optional[str]]:
+    """Return ``(description without the tag, activity or None)``.
+
+    The tag is a word such as ``@support`` anywhere in the description, and
+    the activity is returned in lowercase.  Only the first tag counts.
+    """
+    m = _LEGEND_ACTIVITY_RE.search(desc or "")
+    if not m:
+        return desc, None
+    rest = (desc[:m.start()] + desc[m.end():]).strip()
+    return re.sub(r"[ \t]{2,}", " ", rest), m.group(1).lower()
+
 
 def day_offset(cell: Optional[str]) -> Optional[int]:
     """Return the Monday offset for ``cell`` when it names a day, else None."""
@@ -71,8 +116,10 @@ def parse_table(rows: List[Row]) -> ParsedTable:
     """Parse table ``rows`` (from :func:`parse_org_table`) into a ParsedTable."""
     columns: List[Tuple[int, int]] = []   # (col_index, day_offset)
     section: Optional[str] = None
-    events: List[Event] = []
+    # (header section or None, activity letter or None, offset, start, end, code)
+    pending: List[Tuple[Optional[str], Optional[str], int, str, str, str]] = []
     legend: List[Tuple[str, str]] = []
+    defaults: dict = {}                   # code -> section, first definition wins
     letters: List[str] = []
 
     for row in rows:
@@ -98,6 +145,9 @@ def parse_table(rows: List[Row]) -> ParsedTable:
             desc = m.group(2).strip()
             if desc == "":
                 desc = " ".join(cells[1:]).strip()
+            desc, activity = split_legend_activity(desc)
+            if ltr not in {code for code, _d in legend}:
+                defaults[ltr] = LEGEND_ACTIVITY_SECTION.get(activity or "")
             legend.append((ltr, desc))
             continue
 
@@ -107,16 +157,8 @@ def parse_table(rows: List[Row]) -> ParsedTable:
             for col_index, off in columns:
                 cell = cells[col_index] if col_index < len(cells) else ""
                 if cell:
-                    ltr = cell.upper()
-                    events.append(
-                        Event(
-                            section=section or "Writing",
-                            offset=off,
-                            start=rng[0],
-                            end=rng[1],
-                            letter=ltr,
-                        )
-                    )
+                    activity, ltr = split_cell(cell)
+                    pending.append((section, activity, off, rng[0], rng[1], ltr))
                     if ltr not in letters:
                         letters.append(ltr)
             continue
@@ -127,6 +169,16 @@ def parse_table(rows: List[Row]) -> ParsedTable:
             continue
         # Otherwise ignore the row.
 
+    # The activity of a block comes from the first of these that is present:
+    # a prefix in the cell, a default on the code's legend entry, the section
+    # header above the row, and finally "Writing".  The legend usually sits
+    # below the grid, so the defaults are applied once every row is read.
+    events = [
+        Event(section=(ACTIVITY_SECTION.get(activity or "") or defaults.get(ltr)
+                       or header or "Writing"),
+              offset=off, start=start, end=end, letter=ltr, activity=activity)
+        for header, activity, off, start, end, ltr in pending
+    ]
     return ParsedTable(
         events=events,
         legend=legend,

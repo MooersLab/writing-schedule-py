@@ -9,15 +9,25 @@ from __future__ import annotations
 
 from typing import List
 
-from .config import DEFAULT_SLOTS, PROJECT_LETTERS
+from .config import DEFAULT_SLOTS, PROJECT_LETTERS, STARTER_SLOTS, TEMPLATE_STYLES
 
 
 def _blank_row(label: str, nd: int) -> str:
     return "| " + label + " |" + "  |" * nd + "\n"
 
 
-def template_string(n: int) -> str:
-    """Return a blank weekly schedule template for ``n`` projects (1..26)."""
+def template_string(n: int, style: str = "standard") -> str:
+    """Return a blank weekly schedule template for ``n`` projects (1..26).
+
+    ``style`` is ``standard`` for the full nine-block day, or one of the
+    starter days ``morning``, ``evening``, and ``split``, which have three
+    blocks each in the order that suits the writer.  The standard output is
+    unchanged byte for byte.
+    """
+    if style not in TEMPLATE_STYLES:
+        raise ValueError(f"unknown template style {style!r}; choose one of "
+                         + ", ".join(TEMPLATE_STYLES))
+    slots = DEFAULT_SLOTS if style == "standard" else STARTER_SLOTS[style]
     n = max(1, min(len(PROJECT_LETTERS), int(n)))
     days = ["M", "Tu", "W", "Th", "F", "Sa"]
     nd = len(days)
@@ -28,9 +38,9 @@ def template_string(n: int) -> str:
     parts.append(f"#+TITLE: Writing Schedule for {n} Project{plural}\n\n")
     parts.append("| Time <l> | " + " | ".join(days) + " |\n")
     parts.append("|-\n")
-    for name, slots in DEFAULT_SLOTS:
+    for name, times in slots:
         parts.append(_blank_row(name + ":", nd))
-        for slot in slots:
+        for slot in times:
             parts.append(_blank_row(slot, nd))
         parts.append("|-\n")
     for ltr in letters:

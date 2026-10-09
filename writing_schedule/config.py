@@ -19,6 +19,32 @@ DEFAULT_SLOTS: List[Tuple[str, List[str]]] = [
     ("Supporting", ["13:15-14:45", "15:00-16:30", "16:45-18:15", "20:30-22:00"]),
 ]
 
+# Small starter tables for a new writer, one per time of day that suits them.
+# Each keeps the section headers, so a bare code takes the activity of its
+# row, and each day has one generative, one editing, and one support block.
+# The sections follow the order of the day, so an evening writer's Generative
+# section comes last.  Mirrors ``writing-schedule-starter-slots``.
+STARTER_SLOTS: Dict[str, List[Tuple[str, List[str]]]] = {
+    "morning": [
+        ("Generative", ["05:30-07:30"]),
+        ("Rewriting", ["09:00-10:30"]),
+        ("Supporting", ["13:00-14:00"]),
+    ],
+    "evening": [
+        ("Supporting", ["12:15-13:00"]),
+        ("Rewriting", ["17:30-19:00"]),
+        ("Generative", ["21:00-23:30"]),
+    ],
+    "split": [
+        ("Generative", ["06:00-07:30"]),
+        ("Supporting", ["12:30-13:15"]),
+        ("Rewriting", ["19:30-21:00"]),
+    ],
+}
+
+#: The template styles :func:`writing_schedule.template.template_string` takes.
+TEMPLATE_STYLES: List[str] = ["standard"] + list(STARTER_SLOTS)
+
 # Default single-letter project codes for a scaffolded template.
 PROJECT_LETTERS: List[str] = [chr(c) for c in range(ord("A"), ord("Z") + 1)]
 

@@ -28,6 +28,7 @@ from .schedule import (
 from .sheet import render_day_pdf, render_week_pdf
 from .sheet_latex import render_latex
 from .sheet_org import build_week_org
+from .config import TEMPLATE_STYLES
 from .template import template_string
 from .week import iso_date, resolve_date, week_monday
 
@@ -216,7 +217,7 @@ def _cmd_check(args) -> int:
 
 
 def _cmd_template(args) -> int:
-    text = template_string(args.n)
+    text = template_string(args.n, args.style)
     if args.out:
         os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
         with open(args.out, "w", encoding="utf-8") as fh:
@@ -296,6 +297,8 @@ def build_parser() -> argparse.ArgumentParser:
     t = sub.add_parser("template", help="print or write a blank weekly table")
     t.add_argument("n", type=int, help="number of projects (1-26)")
     t.add_argument("--out", help="write to this file instead of stdout")
+    t.add_argument("--style", choices=TEMPLATE_STYLES, default="standard",
+                   help="standard (nine blocks) or a three-block starter day")
     t.set_defaults(func=_cmd_template)
 
     w = sub.add_parser("weeks", help="list archived weekly schedule files")

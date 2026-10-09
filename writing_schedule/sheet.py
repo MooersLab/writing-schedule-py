@@ -197,7 +197,7 @@ def _draw_page(c: canvas.Canvas, date_str: str, key_text: str,
         if not open_top:
             c.setFont("Helvetica-Bold", 8)
             star = " *" if event_identity(ev) in marked else ""
-            label = f"{ev.letter}  {tidy(ev.start)}-{tidy(ev.end)}{star}"
+            label = f"{ev.label}  {tidy(ev.start)}-{tidy(ev.end)}{star}"
             c.drawString(box_left + 3, yt - 10, label)
 
 

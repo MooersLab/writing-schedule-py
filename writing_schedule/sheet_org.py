@@ -72,7 +72,7 @@ def build_week_org(
                     day_flagged = True
                 rows.append(
                     f"| {_tidy(e.start)}-{_tidy(e.end)}{star} "
-                    f"| {e.letter} | {task} | |"
+                    f"| {e.label} | {task} | |"
                 )
         else:
             rows.append("| | | | |")

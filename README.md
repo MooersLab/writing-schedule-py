@@ -50,7 +50,17 @@ To start from a blank grid, ask the tool for one and then fill in the cells:
 writing-schedule template 5 --out my-week.org
 ```
 
-That writes a blank table for five projects. You can also copy the worked
+That writes a blank table for five projects, with nine time blocks in three
+sections. A new writer may prefer a smaller starter day with three blocks in
+the order that suits them. Add `--style morning`, `--style evening`, or
+`--style split`. The evening day ends with generative writing from 21:00 to
+23:30.
+
+```
+writing-schedule template 3 --style evening --out evening.org
+```
+
+You can also copy the worked
 example below, which is `examples/my-week.org` in the repository.
 
 ```
@@ -109,6 +119,14 @@ projects or to single letters. When the first cell is only the code and a
 colon, the description may instead sit in the second cell. The code test is
 case-sensitive, which is how `A: docking` is read as a legend while
 `Generative:` is read as a section header.
+
+A day cell may also carry the activity of its block as a lowercase letter
+before the code, so `gA` is generative writing on A, `eA` is editing, and
+`sEM` is support work on email. A legend entry may name a default activity
+with a tag, as in `EM: email @support`, so a bare `EM` counts as support.
+The letter wins over the tag, and the tag wins over the section header.
+With letters in the cells, a table needs no section rows at all. See
+[docs/org-format.md](docs/org-format.md) for the full rule.
 
 ### Step 3, generate the outputs
 
@@ -183,7 +201,7 @@ writing-schedule generate  TABLE (--week 2026-01-19 | --day 2026-01-21|today) [-
 writing-schedule export    TABLE (--week 2026-01-19 | --day 2026-01-21|today) [--dir OUT] [--tz ZONE] [--strict]
 writing-schedule sheets    TABLE (--week 2026-01-19 | --day 2026-01-21|today) [--dir OUT] [--engine reportlab|latex] [--format pdf|org|both] [--per-day] [--strict]
 writing-schedule check     TABLE
-writing-schedule template  N [--out FILE]
+writing-schedule template  N [--out FILE] [--style standard|morning|evening|split]
 writing-schedule weeks     [--dir OUT]
 ```
 
