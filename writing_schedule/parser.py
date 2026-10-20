@@ -33,17 +33,23 @@ _TIME_RE = re.compile(
     r"([0-9]{1,2}):[ \t]*([0-9]{2})[ \t]*-+[ \t]*([0-9]{1,2}):[ \t]*([0-9]{2})"
 )
 
-# Case-sensitive.  A short uppercase code, then a colon.
-_LEGEND_RE = re.compile(r"^([A-Z][A-Z0-9]{0,3})[ \t]*:(.*)$")
+# A project code: a capital followed by up to three capitals or digits, or a
+# single digit 0-9.  The digits give ten more one-character codes, which the
+# table file name can carry.  Case-sensitive.
+CODE_PATTERN = r"(?:[A-Z][A-Z0-9]{0,3}|[0-9])"
+
+# A short code, then a colon.  A digit code is checked against the time
+# pattern before it is accepted, because "5:00-06:30" also starts that way.
+_LEGEND_RE = re.compile(r"^(" + CODE_PATTERN + r")[ \t]*:(.*)$")
 
 # A section header: letters and spaces only, optional trailing colon.
 _SECTION_RE = re.compile(r"^[A-Za-z][A-Za-z ]*:?$")
 
-# A day cell with an activity letter before the code, as in gA, eB, or sEM.
+# A day cell with an activity letter before the code, as in gA, eB, sEM, or g3.
 # The letter counts only when it is lowercase and the code that follows starts
-# with a capital, so a cell typed all in lowercase, such as "ga", is still the
+# with a capital or is a digit, so a cell typed all in lowercase, such as "ga", is still the
 # code GA.  Mirrors ``writing-schedule--cell-regexp``.
-_CELL_RE = re.compile(r"^([ges])([A-Z][A-Z0-9]{0,3})$")
+_CELL_RE = re.compile(r"^([ges])(" + CODE_PATTERN + r")$")
 
 #: The section name each activity letter of a day cell stands for.  These are
 #: the names the blank template uses, so a prefixed cell and a cell under the
@@ -138,8 +144,11 @@ def parse_table(rows: List[Row]) -> ParsedTable:
                     columns.append((i, off))
             continue
 
-        # Row kind two: the legend row (case-sensitive).
+        # Row kind two: the legend row (case-sensitive).  A label such as
+        # "5:00-06:30" is a time, not the legend entry of code 5.
         m = _LEGEND_RE.match(label)
+        if m and m.group(1).isdigit() and _TIME_RE.search(label):
+            m = None
         if m:
             ltr = m.group(1).upper()
             desc = m.group(2).strip()
@@ -187,6 +196,75 @@ def parse_table(rows: List[Row]) -> ParsedTable:
     )
 
 
+_NAME_RE = re.compile(r"^\s*#\+NAME:\s*(.*?)\s*$", re.IGNORECASE)
+_RISKS = {"safe": "safe", "risky": "risky", "speculative": "risky"}
+
+
+def column_legend(text: str) -> List[Tuple[str, str]]:
+    """Read a legend kept in columns in a table named ``This week``.
+
+    The table's first row names its columns, ``Code``, ``Project Number``,
+    ``Project Name``, ``Deadline``, ``Risk tag``, and ``Default activity``.
+    Each row becomes the ``(code, description)`` the one-cell legend row
+    ``B: 1006AIrxOpt 2026-12-15 :safe:`` would give, so the sheets, the
+    calendar, and plan import read either layout the same way.
+    """
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        m = _NAME_RE.match(line)
+        if not m or re.sub(r"\s+", " ", m.group(1)).strip().lower() != "this week":
+            continue
+        rows = []
+        for row_line in lines[index + 1:]:
+            s = row_line.strip()
+            if s.startswith("#+"):
+                continue
+            if not s.startswith("|"):
+                break
+            if re.match(r"^\|[-+]", s):
+                continue
+            rows.append([c.strip() for c in s.strip("|").split("|")])
+        if not rows or not rows[0] or not rows[0][0].lower().startswith("code"):
+            return []
+        legend: List[Tuple[str, str]] = []
+        for row in rows[1:]:
+            row = (row + [""] * 6)[:6]
+            code, number, name, deadline, risk, activity = row
+            code = code.rstrip(":").strip().upper()
+            if not code or code == "-" or not re.fullmatch(CODE_PATTERN, code):
+                continue
+            desc = f"{number}{name}".strip()
+            if deadline:
+                desc += f" {deadline}"
+            word = activity.lstrip("@").strip().lower()
+            if word in ("generative", "editing", "support"):
+                desc += f" @{word}"
+            tag = _RISKS.get(risk.strip(":() ").lower())
+            if tag:
+                desc += f" :{tag}:"
+            legend.append((code, desc))
+        return legend
+    return []
+
+
 def parse_text(text: str) -> ParsedTable:
-    """Convenience: read the first org table in ``text`` and parse it."""
-    return parse_table(parse_org_table(text))
+    """Read the first org table in ``text`` and parse it.
+
+    When that table has no legend rows, a legend kept in columns in a table
+    named ``This week`` is read instead (see :func:`column_legend`).
+    """
+    parsed = parse_table(parse_org_table(text))
+    if not parsed.legend:
+        legend = column_legend(text)
+        if legend:
+            defaults = {}
+            for code, desc in legend:
+                _desc, activity = split_legend_activity(desc)
+                defaults.setdefault(code, LEGEND_ACTIVITY_SECTION.get(activity or ""))
+            parsed.legend = [(code, split_legend_activity(desc)[0]) for code, desc in legend]
+            parsed.events = [
+                ev if ev.activity or ev.section not in ("Writing",) or not defaults.get(ev.letter)
+                else Event(section=defaults[ev.letter], offset=ev.offset, start=ev.start,
+                           end=ev.end, letter=ev.letter, activity=ev.activity)
+                for ev in parsed.events]
+    return parsed

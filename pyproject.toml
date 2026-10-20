@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "writing-schedule"
-version = "0.4.0"
+version = "0.6.0"
 description = "Turn a weekly org-mode block table into a dated schedule, an iCalendar file, and a printable time-block PDF."
 readme = "README.md"
 requires-python = ">=3.9"

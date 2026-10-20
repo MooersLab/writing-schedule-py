@@ -115,7 +115,11 @@ spaces, and more than one hyphen are all accepted.
 A legend row maps a code to a description, as in `A: DNPH1 docking`. The code
 is one uppercase letter followed by up to three more uppercase letters or
 digits, so `A`, `EM`, and `W2` are all valid, and you are not limited to four
-projects or to single letters. When the first cell is only the code and a
+projects or to single letters. A single digit, `0` to `9`, is also a code,
+which gives ten more one-character projects after the 26 letters, so `g3` in a
+day cell and `3: 0374qflip` in the legend name project 3. A legend row whose
+label reads as a time, such as `5:00-06:30`, stays a time block and is never
+read as project 5. When the first cell is only the code and a
 colon, the description may instead sit in the second cell. The code test is
 case-sensitive, which is how `A: docking` is read as a legend while
 `Generative:` is read as a section header.
