@@ -234,6 +234,7 @@ def column_legend(text: str) -> List[Tuple[str, str]]:
             if not code or code == "-" or not re.fullmatch(CODE_PATTERN, code):
                 continue
             desc = f"{number}{name}".strip()
+            deadline = re.sub(r"\s+", "", deadline)
             if deadline:
                 desc += f" {deadline}"
             word = activity.lstrip("@").strip().lower()
@@ -263,7 +264,8 @@ def parse_text(text: str) -> ParsedTable:
                 defaults.setdefault(code, LEGEND_ACTIVITY_SECTION.get(activity or ""))
             parsed.legend = [(code, split_legend_activity(desc)[0]) for code, desc in legend]
             parsed.events = [
-                ev if ev.activity or ev.section not in ("Writing",) or not defaults.get(ev.letter)
+                # A legend default beats a section header, as in parse_table.
+                ev if ev.activity or not defaults.get(ev.letter)
                 else Event(section=defaults[ev.letter], offset=ev.offset, start=ev.start,
                            end=ev.end, letter=ev.letter, activity=ev.activity)
                 for ev in parsed.events]
