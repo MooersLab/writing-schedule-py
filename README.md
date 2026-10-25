@@ -9,8 +9,8 @@ A Python port of `mooerslab/writing-schedule.el`. It reads the same weekly org-m
 block table and produces the same three outputs, namely the dated schedule
 `.org` file, an iCalendar `.ics` file, and a printable time-block PDF. A
 person who cannot install Emacs gets the same artifacts from a single
-`pip install`, because the PDF is drawn with ReportLab rather than TeX.
-The `.org` file can be exported to HTML or other formats with pandoc.
+`pip install`, because ReportLab writes the PDF rather than TeX.
+You can export the `.org` file to HTML or other formats with pandoc.
 
 You do not need Emacs, and you do not need `writing-schedule.el`, to use this
 package. It is a standalone command-line program and Python library whose only
