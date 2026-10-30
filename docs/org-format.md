@@ -113,6 +113,12 @@ A legend entry may name the usual activity of its code with a tag such as
 `E` in any cell then counts as support. The tag is removed from the
 description, and a risk tag such as `:safe:` may follow it.
 
+The risk tags are `:safe:` and `:risky:`. The scheduler reads them as part of
+the description and gives them no meaning of its own. The companion package writing-habit reads them for its barbell
+split of safe and speculative work, and it labels tracked time on a writing
+project that is in neither the legend nor the semester lists of the file as
+risky prospecting.
+
 The activity of a block comes from the first of these that is present.
 
 1. An activity letter in the cell, such as `eA`.

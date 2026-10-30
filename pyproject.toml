@@ -19,7 +19,7 @@ classifiers = [
 dependencies = ["reportlab>=3.6"]
 
 [project.optional-dependencies]
-test = ["pytest>=7.0"]
+test = ["pytest>=7.0", "pypdf>=3.0"]
 # bandit[toml] lets bandit read its config from this pyproject on Python 3.9
 # and 3.10, where tomllib is not in the standard library.
 security = ["bandit[toml]>=1.7"]

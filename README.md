@@ -132,6 +132,8 @@ The letter wins over the tag, and the tag wins over the section header.
 With letters in the cells, a table needs no section rows at all. See
 [docs/org-format.md](docs/org-format.md) for the full rule.
 
+A legend description may end with a risk tag, `:safe:` or `:risky:`. The scheduler reads the tag as part of the description and gives it no meaning of its own. The companion package writing-habit reads it to split the week into safe and speculative work. writing-habit also labels time that your tracker logs on a writing project that is in neither the week's legend nor the semester project lists kept below the table. It calls that work risky prospecting, because unplanned exploratory work is the most likely to be abandoned for lack of time. Putting a project in the legend, or on a semester list, is what makes it planned work.
+
 ### Step 3, generate the outputs
 
 Point the tool at your table and name any day inside the target week, because
