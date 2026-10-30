@@ -2,15 +2,17 @@
 ![Version](https://img.shields.io/static/v1?label=writing-schdule-py&message=0.3.1&color=brightcolor)
 [![PyPI version](https://img.shields.io/pypi/v/writing-schedule.svg)](https://pypi.org/project/writing-schedule/)
 [![Python versions](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://pypi.org/project/writing-schedule/)
-[![Documentation Status](https://readthedocs.org/projects/writing-schedule-py/badge/?version=latest)](https://writing-schedule-py.readthedocs.io/en/latest/?badge=latest)
+
+[![Documentation Status](https://readthedocs.org/projects/writing-schedule-py/badge/?version=latest)](https://writing-schedule-py.readthedocs.io/en/latest/)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A Python port of `mooerslab/writing-schedule.el`. It reads the same weekly org-mode
 block table and produces the same three outputs, namely the dated schedule
 `.org` file, an iCalendar `.ics` file, and a printable time-block PDF. A
 person who cannot install Emacs gets the same artifacts from a single
-`pip install`, because the PDF is drawn with ReportLab rather than TeX.
-The `.org` file can be exported to HTML or other formats with pandoc.
+`pip install`, because ReportLab writes the PDF rather than TeX.
+You can export the `.org` file to HTML or other formats with pandoc.
 
 You do not need Emacs, and you do not need `writing-schedule.el`, to use this
 package. It is a standalone command-line program and Python library whose only
